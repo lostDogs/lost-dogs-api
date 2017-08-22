@@ -1,0 +1,17 @@
+web:
+  build: Dockerfile.dev
+  ports:
+    - '3000:3000'
+  working_dir: /usr/src/app
+  command: npm start
+  volumes:
+    - ./:/usr/src/app
+  links:
+    - mongodb
+
+mongodb:
+  image: mongo
+  volumes:
+    - ./tools/backup:/usr/dump
+  ports:
+    - '27017:27017'

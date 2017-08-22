@@ -1,0 +1,5 @@
+{
+  "name": "lost-dogs-api",
+  "description": "The api for lost dogs app",
+  "image": "node"
+}
