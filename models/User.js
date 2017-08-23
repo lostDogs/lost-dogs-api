@@ -22,6 +22,41 @@ const s3 = require('../aws/s3')({
   bucketName: process.env.S3_BUCKET,
 });
 
+userSchema.methods.getInfo = function getInfo() {
+  return objectMapper(this, userMappings.infoMap);
+};
+
+userSchema.methods.updateAvatar = function updateAvatar(fileType) {
+  // encript filename
+  return encryptString(`${this.username}-${uuid()}-${Date.now()}`)
+
+    .then(fileName => (
+      s3.signObject({
+        fileName,
+
+        // mimetype
+        fileType,
+      })
+    ))
+
+    // send back result from validations
+    .then(avatar => (
+      new Promise((resolve, reject) => {
+        this.avatar_url = avatar.url;
+        this.save(err => (
+          err ? reject({
+            statusCode: 500,
+            code: 'Error while updating avatar',
+          }) :
+          resolve({
+            uploadAvatarUrl: avatar.signedRequest,
+            avatar_url: avatar.url,
+          })
+        ));
+      })
+    ));
+};
+
 userSchema.statics.createMap = body => (
   validateRequiredFields(objectMapper(body, userMappings.createMap), userMappings.createRequiredFieldsList)
 
@@ -62,10 +97,6 @@ userSchema.statics.createMap = body => (
 userSchema.statics.updateMap = body => (
   Promise.resolve(objectMapper(body, userMappings.updateMap))
 );
-
-userSchema.methods.getInfo = function getInfo() {
-  return objectMapper(this, userMappings.infoMap);
-};
 
 userSchema.statics.validateToken = function validateToken(jwtPayload) {
   return new Promise((resolve, reject) => {

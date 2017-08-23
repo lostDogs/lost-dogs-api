@@ -8,7 +8,7 @@ const logger = require('morgan');
 const dotenv = require('dotenv');
 
 // load environment options
-if(process.env.ENVIRONMENT !== 'production') {
+if (process.env.ENVIRONMENT !== 'production') {
   dotenv.load({ path: '.env' });
 }
 

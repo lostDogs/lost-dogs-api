@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 // models
 const User = require('../models/User');
 
-const validateToken = (token, username) => {
+const validateToken = (token, username, reqUser) => {
   if (!token) {
     return Promise.reject({
       statusCode: 401,
@@ -20,39 +20,42 @@ const validateToken = (token, username) => {
   }
 
   return new Promise((resolve, reject) => (
-      jwt.verify(token.split(' ')[1], process.env.SESSION_SECRET, { algorithms: ['HS384'] }, (verifyError, jwtPayload) => {
-        if (verifyError) {
-          return reject({
-            statusCode: 401,
-            code: 'Not a valid token.',
-          });
-        }
+    jwt.verify(token.split(' ')[1], process.env.SESSION_SECRET, { algorithms: ['HS384'] }, (verifyError, jwtPayload) => {
+      if (verifyError) {
+        return reject({
+          statusCode: 401,
+          code: 'Not a valid token.',
+        });
+      }
 
-        if (!jwtPayload.username) {
-          return resolve(jwtPayload);
-        }
+      if (!jwtPayload.username && reqUser) {
+        return reject({
+          statusCode: 401,
+          code: 'Action requires authenticated user.',
+        });
+      }
 
-        if (username && jwtPayload.username !== username) {
-          return reject({
-            statusCode: 401,
-            code: 'Username doesn\'t match with token',
-          });
-        }
-
+      if (!jwtPayload.username) {
         return resolve(jwtPayload);
-      })
-    ))
+      }
 
-    .then(jwtPayload => (
-      User.validateToken(jwtPayload)
+      if (username && jwtPayload.username !== username) {
+        return reject({
+          statusCode: 401,
+          code: 'Username doesn\'t match with token.',
+        });
+      }
 
-      .then(user => (
-        Promise.resolve({
-          user,
-          jwtPayload,
-        })
-      ))
-    ));
+      return User.validateToken(jwtPayload)
+
+        .then(user => (
+          resolve({
+            user,
+            jwtPayload,
+          })
+        ));
+    })
+  ));
 };
 
 module.exports.signToken = jwtPayload => (
@@ -70,10 +73,9 @@ module.exports.signToken = jwtPayload => (
   })
 );
 
-module.exports.middleware = (req, res, next) => {
-  const token = req.headers.Authorization || req.headers.authorization;
-
-  validateToken(token, req.params[0].replace('/', ''))
+module.exports.middleware = ({ reqUser }) => (
+  (req, res, next) => {
+    validateToken(req.headers.Authorization || req.headers.authorization, req.params.username, reqUser)
 
     .then((authInfo) => {
       req.user = authInfo.user;
@@ -83,4 +85,5 @@ module.exports.middleware = (req, res, next) => {
     }, err => (
       res.status(err.statusCode).json(err)
     ));
-};
+  }
+);

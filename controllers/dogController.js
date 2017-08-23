@@ -9,7 +9,9 @@ module.exports = () => {
   const crudManager = CrudManager(Dog);
 
   const create = (req, res) => {
-    crudManager.create(req.body, (err, dog) => (
+    crudManager.create(Object.assign(req.body, {
+      username: req.jwtPayload.username,
+    }), (err, dog) => (
       err ? ErrorHander.handle(err, res) : res.status(201).json(dog)
     ));
   };
@@ -20,15 +22,33 @@ module.exports = () => {
     ));
   };
 
-
   const update = (req, res) => {
-    crudManager.update(req.body, req.params.id, (err, dog) => {
-      if (err) {
-        return ErrorHander.handle(err, res);
-      }
+    Dog.updateMap(req.body)
 
-      return res.json(dog);
-    });
+    .then(updateBody => (
+      new Promise((resolve, reject) => (
+        Dog.findOne({ reporter_id: req.jwtPayload.username }, (err, dog) => (
+          err || !dog ? reject({
+            statusCode: 401,
+            code: 'Not authorized.',
+          }) :
+          resolve(dog)
+        ))
+      ))
+
+      .then(dog => (
+        Object.assign(dog, updateBody).save(err => (
+          err ? ErrorHander.handle({
+            statusCode: 500,
+            code: 'Erorr saving object to database.',
+          }, res) : res.json(dog.getInfo())
+        ))
+      ))
+    ))
+
+    .catch(err => (
+      ErrorHander.handle(err, res)
+    ));
   };
 
   const retrieve = (req, res) => {

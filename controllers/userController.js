@@ -161,11 +161,22 @@ module.exports = () => {
     ));
   };
 
+  const updateAvatar = (req, res) => {
+    req.user.updateAvatar(req.body.fileType)
+
+    .then(updateInfo => (
+      res.json(updateInfo)
+    ), err => (
+      ErrorHander.handle(err, res)
+    ));
+  };
+
   return {
     create,
     retrieve,
     update,
     deleteItem,
     login,
+    updateAvatar,
   };
 };

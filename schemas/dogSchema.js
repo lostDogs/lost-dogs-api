@@ -10,8 +10,9 @@ module.exports = new mongoose.Schema({
   },
 
   search: Array,
-
-  reporter_id: mongoose.Schema.Types.ObjectId,
+  reporter_id: String,
+  image_url: String,
+  uploadImageUrl: String,
 
   // doc managment
   created_at: {
@@ -31,18 +32,21 @@ module.exports.dogMappings = {
     kind: 'kind',
     description: 'description',
     found_date: 'found_date',
-    reporter_id: 'reporter_id',
+    imageFileType: 'fileType',
+    username: 'reporter_id',
   },
 
   infoMap: {
+    _id: '_id',
     name: 'name',
     kind: 'kind',
     description: 'description',
     found_date: 'found_date',
     reporter_id: 'reporter_id',
     created_at: 'created_at',
-    _id: '_id',
+    uploadImageUrl: 'uploadImageUrl',
+    image_url: 'image_url',
   },
 
-  createRequiredFieldsList: 'name kind found_date reporter_id'.split(' '),
+  createRequiredFieldsList: 'name kind found_date fileType reporter_id'.split(' '),
 };

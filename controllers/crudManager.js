@@ -57,7 +57,7 @@ module.exports = (model) => {
       ));
   };
 
-  const update = (body, id, callback) => {
+  const update = (id, body, callback) => {
     model.updateMap(body)
 
       .then(updateBody => (
