@@ -19,6 +19,6 @@ router.put('/:id', userAuthMiddleware, controller.update);
 router.delete('/:id', userAuthMiddleware, controller.deleteItem);
 
 // Extras
-router.put('/:id/image', userAuthMiddleware, controller.updateImage);
+// router.put('/:id/image', userAuthMiddleware, controller.updateImage);
 
 module.exports = router;

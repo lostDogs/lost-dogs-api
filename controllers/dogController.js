@@ -63,6 +63,17 @@ module.exports = () => {
     ));
   };
 
+  // const updateImage = (req, res) => {
+  //   Dog.
+  //   user.updateAvatar(req.body.fileType)
+
+  //   .then(updateInfo => (
+  //     res.json(updateInfo)
+  //   ), err => (
+  //     ErrorHander.handle(err, res)
+  //   ));
+  // };
+
   return {
     create,
     retrieve,

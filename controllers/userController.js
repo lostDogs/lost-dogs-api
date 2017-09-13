@@ -29,7 +29,7 @@ module.exports = () => {
   const create = (req, res) => {
     User.createMap(req.body)
 
-    .then(({ avatar, createBody }) => {
+    .then(({ uploadAvatarUrl, createBody }) => {
       User.findOne({
         $or: [{
           username: createBody.username,
@@ -59,7 +59,7 @@ module.exports = () => {
             }, res);
           }
 
-          return res.status(201).json(Object.assign(newUser.getInfo(), { avatar }));
+          return res.status(201).json(Object.assign(newUser.getInfo(), { uploadAvatarUrl }));
         });
       });
     })
