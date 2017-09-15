@@ -5,6 +5,9 @@ const User = require('../models/User');
 const ErrorHander = require('../utils/errorHandler');
 const token = require('../utils/token');
 
+// outbound
+const email = require('../outbound/email');
+
 module.exports = () => {
   const findByUsername = username => (
     new Promise((resolve, reject) => {
@@ -59,7 +62,13 @@ module.exports = () => {
             }, res);
           }
 
-          return res.status(201).json(Object.assign(newUser.getInfo(), { uploadAvatarUrl }));
+          return email.verifyAccount(newUser)
+
+          .then(() => (
+            res.status(201).json(Object.assign(newUser.getInfo(), { uploadAvatarUrl }))
+          ), emailErr => (
+            ErrorHander.handle(emailErr, res)
+          ));
         });
       });
     })

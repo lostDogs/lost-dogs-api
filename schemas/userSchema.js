@@ -33,6 +33,11 @@ module.exports = new mongoose.Schema({
   password: String,
   token: String,
 
+  verified_email: {
+    type: Boolean,
+    default: false,
+  },
+
   updated_at: {
     type: Date,
     default: Date.now,

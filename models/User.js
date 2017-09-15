@@ -14,13 +14,7 @@ const encryptString = require('../utils/common').encryptString;
 const compareToEncryptedString = require('../utils/common').compareToEncryptedString;
 
 // AWS
-const s3 = require('../aws/s3')({
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
-  },
-  bucketName: process.env.S3_BUCKET,
-});
+const s3 = require('../aws').s3(process.env.S3_BUCKET);
 
 userSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, userMappings.infoMap);

@@ -87,3 +87,11 @@ module.exports.validateRequiredFields = (object, requiredFieldsList) => {
 
   return Promise.resolve(object);
 };
+
+module.exports.hugs = (content, template) => (
+  template.match(/{{(.*?)}}/g) ?
+  template.match(/{{(.*?)}}/g).map(placeholder => placeholder.replace(/{+|}+/g, '')).forEach((placeholder) => {
+    const value = select(content, placeholder);
+    template = template.replace(`{{${placeholder}}}`, typeof value !== 'undefined' && value !== null ? select(content, placeholder) : '');
+  }) : template
+);
