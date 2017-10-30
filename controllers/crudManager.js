@@ -1,165 +1,116 @@
-// dependencies
-const objectMapper = require('object-mapper');
-
 // libs
-const validatePagination = require('../utils/common').validatePagination;
-
-// static
-const searchMapping = {
-  searchTerms: {
-    key: 'searchTerms',
-    default: ' ',
-  },
-  page: {
-    key: 'page',
-    default: '0',
-  },
-  pageSize: {
-    key: 'pageSize',
-    default: '12',
-  },
-};
+const { validatePagination } = require('../utils/common');
 
 module.exports = (model) => {
-  const retrieve = (id, callback) => {
-    model.findById(id, (err, item) => {
-      if (err) {
-        return callback({
-          statusCode: 500,
-          code: 'Error while retrieving object.',
-        });
-      } else if (!item) {
-        return callback({
-          statusCode: 404,
-          code: 'Not found.',
-        });
-      }
+  const retrieve = id => (
+    model.findById(id)
 
-      return callback(null, item.getInfo());
-    });
-  };
+    .then(item => (!item ? Promise.reject({
+      statusCode: 404,
+      code: 'Not found.',
+    }) : item.getInfo()))
 
-  const create = (body, callback) => {
+    .catch(() => (
+      Promise.reject({
+        statusCode: 500,
+        code: 'Error while retrieving object.',
+      })
+    ))
+  );
+
+  const create = body => (
     model.createMap(body)
-      .then(createBody => (
-        model.create(createBody, (err, item) => {
-          if (err) {
-            return callback({
-              statusCode: 500,
-              code: 'Error while saving object.',
-            });
-          }
 
-          return callback(null, item.getInfo());
+    .then(createBody => (
+      model.create(createBody)
+
+      .then(item => (
+        Promise.reolve(item.getInfo())
+      ))
+
+      .catch(() => (
+        Promise.reject({
+          statusCode: 500,
+          code: 'Error while saving object.',
         })
-      ), err => (
-        callback(err)
-      ));
-  };
+      ))
+    ))
+  );
 
-  const update = (id, body, callback) => {
+  const update = (id, body) => {
     model.updateMap(body)
 
       .then(updateBody => (
-        model.findOneAndUpdate({ _id: id }, updateBody, (err, item) => {
-          if (err) {
-            return callback({
-              statusCode: 500,
-              code: 'Error while updating object.',
-            });
-          } else if (!item) {
-            return callback({
-              statusCode: 404,
-              code: 'Not found.',
-            });
-          }
+        model.findOneAndUpdate({ _id: id }, updateBody)
 
-          return retrieve(item.id, callback);
-        })
-      ), err => (
-        callback(err)
+        .then(item => (!item ? Promise.reject({
+          statusCode: 404,
+          code: 'Not found.',
+        }) : retrieve(item.id)))
+
+        .catch(() => (
+          Promise.reject({
+            statusCode: 500,
+            code: 'Error while updating object.',
+          })
+        ))
       ));
   };
 
-  const search = (query, callback) => {
-    const mappedQuery = objectMapper(query, searchMapping);
+  const search = ({ searchTerms = ' ', page = 0, pageSize = 12 }) => (
+    validatePagination(page, pageSize)
 
-    // get pagination
-    const pagination = validatePagination(mappedQuery.page, mappedQuery.pageSize);
-    if (!pagination) {
-      return callback({
-        statusCode: 400,
-        code: 'Invalid pagination.',
-      });
-    }
-
-    const searchRequest = type => (
-      new Promise((resolve, reject) => {
+    .then(({ skip, limit }) => {
+      const searchRequest = type => (
         model[type]({
-          $and: mappedQuery.searchTerms.trim().split(' ').map(term => ({
+          $and: searchTerms.trim().split(' ').map(term => ({
             search: {
               $regex: term,
               $options: 'i',
             },
           })),
-        }).limit(pagination.limit).skip(pagination.skip)
+        }).limit(limit).skip(skip).sort({ created: -1 })
+        .exec()
+      );
 
-        .sort({
-          created: -1,
-        })
-        .exec((err, result) => (
-          err ? reject(err) : resolve(result)
-        ));
-      })
-    );
+      return Promise.all([searchRequest('find'), searchRequest('count')])
 
-    return Promise.all([
-      searchRequest('find'),
-      searchRequest('count'),
-    ])
+        .then(([items, hits]) => (
+          Promise.all(items.map(item => (
+            Promise.resolve(item.getInfo())
+          )))
 
-    .then((result) => {
-      const hits = result[1];
-      const items = result[0];
+          .then(results => (
+            Promise.resolve({
+              results,
+              hits,
+            })
+          ))
+        ))
 
-      Promise.all(items.map(item => (
-        Promise.resolve(item.getInfo())
-      )))
-
-      .then(results => (
-        callback(null, {
-          results,
-          hits,
-        })
-      ));
-    })
-
-    .catch(() => (
-      callback({
-        statusCode: 500,
-        code: 'Internal server error.',
-      })
-    ));
-  };
-
-  const deleteItem = (id, callback) => {
-    retrieve(id, (findErr) => {
-      if (findErr) {
-        return callback(findErr);
-      }
-
-      return model.remove({ _id: id }, (err, result) => {
-        if (err) {
-          return callback({
+        .catch(() => (
+          Promise.reject({
             statusCode: 500,
-            code: 'Error while deleting object.',
-          });
-        }
+            code: 'Internal server error.',
+          })
+        ));
+    })
+  );
 
-        return callback(null, result);
-      });
-    });
-  };
+  const deleteItem = id => (
+    retrieve(id)
+
+    .then(() => (
+      model.remove({ _id: id })
+
+      .catch(() => (
+        Promise.reject({
+          statusCode: 500,
+          code: 'Error while deleting object.',
+        })
+      ))
+    ))
+  );
 
   return {
     create,

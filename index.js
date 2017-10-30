@@ -1,5 +1,3 @@
-'use strict';
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -13,6 +11,7 @@ if (process.env.ENVIRONMENT !== 'production') {
 }
 
 const app = express();
+mongoose.Promise = Promise;
 
 // middlewares
 app.use(bodyParser.urlencoded({ extended: false }));

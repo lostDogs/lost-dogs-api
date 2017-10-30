@@ -5,19 +5,19 @@ const express = require('express');
 const router = express.Router();
 
 // users controller
-const controller = require('../controllers/userController')();
+const { create, login, retrieve, update, deleteItem, updateAvatar } = require('../controllers/userController')();
 const userAuthMiddleware = require('../utils/token').middleware({ reqUser: true });
 
 // Session managment
-router.post('/', controller.create);
-router.post('/login', controller.login);
+router.post('/', create);
+router.post('/login', login);
 
 // CRUD
-router.get('/:username/profile', userAuthMiddleware, controller.retrieve);
-router.put('/:username', userAuthMiddleware, controller.update);
-router.delete('/:username', userAuthMiddleware, controller.deleteItem);
+router.get('/:username/profile', userAuthMiddleware, retrieve);
+router.put('/:username', userAuthMiddleware, update);
+router.delete('/:username', userAuthMiddleware, deleteItem);
 
 // Extras
-router.put('/:username/avatar', userAuthMiddleware, controller.updateAvatar);
+router.put('/:username/avatar', userAuthMiddleware, updateAvatar);
 
 module.exports = router;

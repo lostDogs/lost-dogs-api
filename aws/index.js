@@ -9,12 +9,12 @@ const credentials = {
 };
 
 module.exports = {
-  s3: bucketName => (
-    s3({
+  s3(bucketName) {
+    return s3({
       credentials,
       bucketName,
-    })
-  ),
+    });
+  },
   ses: ses({
     credentials: Object.assign(credentials, {
       region: process.env.EMAIL_REGION,

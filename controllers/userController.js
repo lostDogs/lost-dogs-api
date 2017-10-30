@@ -2,183 +2,163 @@
 const User = require('../models/User');
 
 // libs
-const ErrorHander = require('../utils/errorHandler');
-const token = require('../utils/token');
+const { handle } = require('../utils/errorHandler');
+const { signToken } = require('../utils/token');
 
 // outbound
-const email = require('../outbound/email');
+const { verifyAccount } = require('../outbound/email');
 
 module.exports = () => {
   const findByUsername = username => (
-    new Promise((resolve, reject) => {
-      User.findOne({ username }, (err, user) => {
-        if (err) {
-          return reject({
-            statusCode: 500,
-            code: 'Internal server error.',
-          });
-        } if (!user) {
-          return reject({
-            statusCode: 404,
-            code: 'User not found.',
-          });
-        }
+    User.findOne({ username })
 
-        return resolve(user);
-      });
-    })
+    .then(user => (!user ? Promise.reject({
+      statusCode: 404,
+      code: 'User not found.',
+    }) : Promise.resolve(user)))
+
+    .catch(() => (
+      Promise.reject({
+        statusCode: 500,
+        code: 'Internal server error.',
+      })
+    ))
   );
 
-  const create = (req, res) => {
-    User.createMap(req.body)
+  const create = ({ body = {} }, res) => (
+    User.createMap(body)
 
-    .then(({ uploadAvatarUrl, createBody }) => {
+    .then(({ uploadAvatarUrl, createBody }) => (
       User.findOne({
         $or: [{
           username: createBody.username,
         }, {
           email: createBody.email,
         }],
-      }, (err, user) => {
-        if (err) {
-          return ErrorHander.handle({
-            statusCode: 500,
-            code: 'Error fetching user',
-          }, res);
-        }
+      })
 
-        if (user) {
-          return ErrorHander.handle({
-            statusCode: 400,
-            code: 'User already exists',
-          }, res);
-        }
+      .then(user => (
+        user ? Promise.reject({
+          statusCode: 400,
+          code: 'User already exists',
+        }) : User.create(createBody)
 
-        return User.create(createBody, (createErr, newUser) => {
-          if (createErr) {
-            return ErrorHander.handle({
-              statusCode: 500,
-              code: 'Error when creating user',
-            }, res);
-          }
-
-          return email.verifyAccount(newUser)
+        .then(newUser => (
+          verifyAccount(newUser)
 
           .then(() => (
             res.status(201).json(Object.assign(newUser.getInfo(), { uploadAvatarUrl }))
-          ), emailErr => (
-            ErrorHander.handle(emailErr, res)
-          ));
-        });
-      });
-    })
+          ), err => (
+            handle(err, res)
+          ))
+        ))
+
+        .catch(() => (
+          handle({
+            statusCode: 500,
+            code: 'Error when creating user',
+          }, res)
+        ))
+      ), () => (
+        handle({
+          statusCode: 500,
+          code: 'Error fetching user',
+        }, res)
+      ))
+    ))
 
     .catch(err => (
-      ErrorHander.handle(err, res)
-    ));
-  };
+      handle(err, res)
+    ))
+  );
 
-  const login = (req, res) => {
-    const body = req.body || {};
+  const login = ({ body = {} }, res) => (!body.username || !body.password ?
+    signToken({
+      timestamp: Date.now(),
+    })
 
-    if (!body.username || !body.password) {
-      return token.signToken({
+    .then(userToken => (
+      res.json({ token: userToken })
+    )) : User.login(body)
+
+    .then(user => (
+      signToken({
+        username: user.username,
         timestamp: Date.now(),
+        token: user.token,
       })
 
       .then(userToken => (
-        res.json({ token: userToken })
-      ));
-    }
-
-    return User.login(req.body)
-
-      .then(user => (
-        token.signToken({
-          username: user.username,
-          timestamp: Date.now(),
-          token: user.token,
-        })
-
-        .then(userToken => (
-          res.json(Object.assign(user.getInfo(), { token: userToken }))
-        ))
+        res.json(Object.assign(user.getInfo(), { token: userToken }))
       ))
+    ))
 
-      .catch(err => (
-        ErrorHander.handle(err, res)
-      ));
-  };
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
 
-  const retrieve = (req, res) => {
-    User.findOne({
-      username: req.params.username,
-    }, (err, user) => {
-      if (err) {
-        return ErrorHander.handle(err, res);
-      } if (!user) {
-        return ErrorHander.handle({
-          statusCode: 404,
-          code: 'User not found.',
-        }, res);
-      }
+  const retrieve = ({ params }, res) => (
+    User.findOne({ username: params.username })
 
-      return res.json(user.getInfo());
-    });
-  };
+    .then(user => (
+      (!user ? handle({
+        statusCode: 404,
+        code: 'User not found.',
+      }, res) : res.json(user.getInfo()))
+    ))
 
-  const update = (req, res) => {
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
+  const update = (req, res) => (
     User.updateMap(req.body)
 
     .then(updateBody => (
-      User.findOneAndUpdate({ username: req.params.username }, updateBody, (err, item) => {
-        if (err) {
-          return ErrorHander.handle({
-            statusCode: 500,
-            code: 'Error while updating object.',
-          }, res);
-        } else if (!item) {
-          return ErrorHander.handle({
-            statusCode: 404,
-            code: 'Not found.',
-          }, res);
-        }
+      User.findOneAndUpdate({ username: req.params.username }, updateBody)
+      .then(item => (!item ?
+        handle({
+          statusCode: 404,
+          code: 'Not found.',
+        }, res) : retrieve(req, res)
+      ))
+    ))
 
-        return retrieve(req, res);
-      })
-    ), err => (
-      ErrorHander.handle(err, res)
-    ));
-  };
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
 
-  const deleteItem = (req, res) => {
-    findByUsername(req.params.username)
+  const deleteItem = ({ params }, res) => (
+    findByUsername(params.username)
 
-    .then((user) => {
-      User.remove({ username: user.username }, (deleteError, result) => {
-        if (deleteError || !result) {
-          return ErrorHander.handle({
-            statusCode: 500,
-            code: 'Error while deleting object.',
-          });
-        }
+    .then(({ username }) => (
+      User.remove({ username })
 
-        return res.sendStatus(202);
-      });
-    }, err => (
-      ErrorHander.handle(err, res)
-    ));
-  };
+      .then(result => (!result ? handle({
+        statusCode: 500,
+        code: 'Error while deleting object.',
+      }) : res.sendStatus(202)))
+    ))
 
-  const updateAvatar = (req, res) => {
-    req.user.updateAvatar(req.body.fileType)
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
+  const updateAvatar = ({ user, body = {} }, res) => (
+    user.updateAvatar(body.fileType)
 
     .then(updateInfo => (
       res.json(updateInfo)
-    ), err => (
-      ErrorHander.handle(err, res)
-    ));
-  };
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
 
   return {
     create,

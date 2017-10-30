@@ -5,18 +5,18 @@ const express = require('express');
 const router = express.Router();
 
 // dogs controller
-const controller = require('../controllers/dogController')();
+const { search, retrieve, create, update, deleteItem } = require('../controllers/dogController')();
 const annonAuthMiddleware = require('../utils/token').middleware({ reqUser: false });
 const userAuthMiddleware = require('../utils/token').middleware({ reqUser: true });
 
 // Public
-router.get('/', annonAuthMiddleware, controller.search);
-router.get('/:id', annonAuthMiddleware, controller.retrieve);
+router.get('/', annonAuthMiddleware, search);
+router.get('/:id', annonAuthMiddleware, retrieve);
 
 // CRUD
-router.post('/', userAuthMiddleware, controller.create);
-router.put('/:id', userAuthMiddleware, controller.update);
-router.delete('/:id', userAuthMiddleware, controller.deleteItem);
+router.post('/', userAuthMiddleware, create);
+router.put('/:id', userAuthMiddleware, update);
+router.delete('/:id', userAuthMiddleware, deleteItem);
 
 // Extras
 // router.put('/:id/image', userAuthMiddleware, controller.updateImage);

@@ -36,7 +36,7 @@ module.exports.generateArrayFromObject = (object, fields) => {
  * @param  {Number} pageSize, size of the page.
  * @return {Object || Boolean}
  */
-module.exports.validatePagination = (page, pageSize) => {
+module.exports.validatePagination = (page = 0, pageSize = 12) => {
   const pageOkay = validator.isInt(page, {
     min: 0,
     max: 99,
@@ -47,14 +47,13 @@ module.exports.validatePagination = (page, pageSize) => {
     max: 48,
   });
 
-  if (!(pageOkay && pageSizeOkay)) {
-    return false;
-  }
-
-  return {
+  return !(pageOkay && pageSizeOkay) ? Promise.reject({
+    statusCode: 400,
+    code: 'Invalid pagination.',
+  }) : Promise.resolve({
     limit: parseInt(pageSize, 10),
     skip: parseInt(pageSize, 10) * parseInt(page, 10),
-  };
+  });
 };
 
 module.exports.encryptString = string => (

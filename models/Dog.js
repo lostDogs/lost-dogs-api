@@ -6,21 +6,13 @@ const uuid = require('uuid-v4');
 
 // schema
 const dogSchema = require('../schemas/dogSchema');
-const dogMappings = require('../schemas/dogSchema').dogMappings;
+const { dogMappings } = require('../schemas/dogSchema');
 
 // libs
-const generateArrayFromObject = require('../utils/common').generateArrayFromObject;
-const validateRequiredFields = require('../utils/common').validateRequiredFields;
-const encryptString = require('../utils/common').encryptString;
+const { generateArrayFromObject, validateRequiredFields, encryptString } = require('../utils/common');
 
 // AWS
-const s3 = require('../aws/s3')({
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_KEY,
-  },
-  bucketName: process.env.S3_BUCKET,
-});
+const s3 = require('../aws/s3')(process.env.S3_BUCKET);
 
 dogSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, dogMappings.infoMap);
@@ -40,21 +32,20 @@ dogSchema.methods.updateImage = function updateImage(fileType) {
     ))
 
     // send back result from validations
-    .then(image => (
-      new Promise((resolve, reject) => {
-        this.image_url = image.url;
-        this.save(err => (
-          err ? reject({
-            statusCode: 500,
-            code: 'Error while updating image',
-          }) :
-          resolve({
-            uploadAvatarUrl: image.signedRequest,
-            avatar_url: image.url,
+    .then(({ url, signedRequest }) => {
+      this.image_url = url;
+      this.save()
+
+        .then(() => (
+          Promise.resolve({
+            uploadAvatarUrl: signedRequest,
+            avatar_url: url,
           })
-        ));
-      })
-    ));
+        ), () => ({
+          statusCode: 500,
+          code: 'Error while updating image',
+        }));
+    });
 };
 
 dogSchema.statics.createMap = body => (

@@ -5,13 +5,10 @@ const uuid = require('uuid-v4');
 
 // schema
 const userSchema = require('../schemas/userSchema');
-const userMappings = require('../schemas/userSchema').userMappings;
+const { userMappings } = require('../schemas/userSchema');
 
 // libs
-const generateArrayFromObject = require('../utils/common').generateArrayFromObject;
-const validateRequiredFields = require('../utils/common').validateRequiredFields;
-const encryptString = require('../utils/common').encryptString;
-const compareToEncryptedString = require('../utils/common').compareToEncryptedString;
+const { generateArrayFromObject, validateRequiredFields, encryptString, compareToEncryptedString } = require('../utils/common');
 
 // AWS
 const s3 = require('../aws').s3(process.env.S3_BUCKET);
@@ -34,21 +31,20 @@ userSchema.methods.updateAvatar = function updateAvatar(fileType) {
     ))
 
     // send back result from validations
-    .then(avatar => (
-      new Promise((resolve, reject) => {
-        this.avatar_url = avatar.url;
-        this.save(err => (
-          err ? reject({
-            statusCode: 500,
-            code: 'Error while updating avatar',
-          }) :
-          resolve({
-            uploadAvatarUrl: avatar.signedRequest,
-            avatar_url: avatar.url,
+    .then(({ url, signedRequest }) => {
+      this.avatar_url = url;
+      this.save()
+
+        .then(() => (
+          Promise.resolve({
+            uploadAvatarUrl: signedRequest,
+            avatar_url: url,
           })
-        ));
-      })
-    ));
+        ), () => ({
+          statusCode: 500,
+          code: 'Error while updating image',
+        }));
+    });
 };
 
 userSchema.statics.createMap = body => (
@@ -92,46 +88,33 @@ userSchema.statics.updateMap = body => (
   Promise.resolve(objectMapper(body, userMappings.updateMap))
 );
 
-userSchema.statics.validateToken = function validateToken(jwtPayload) {
-  return new Promise((resolve, reject) => {
-    this.findOne({
-      username: jwtPayload.username,
-    }, (err, user) => {
-      if (err || !user) {
-        return reject({
-          statusCode: 401,
-          code: 'User not found',
-        });
-      }
+userSchema.statics.validateToken = function validateToken({ username, token }) {
+  this.findOne({ username })
 
-      return compareToEncryptedString(user.token, jwtPayload.token)
+    .then(user => (!user ? Promise.reject({
+      statusCode: 401,
+      code: 'User not found',
+    }) : compareToEncryptedString(user.token, token)
 
-        .then(() => (
-          resolve(user)
-        ));
-    });
-  });
+      .then(() => (
+        Promise.resolve(user)
+      ))
+    ));
 };
 
-userSchema.statics.login = function login(query) {
-  return new Promise((resolve, reject) => {
-    this.findOne({
-      username: query.username,
-    }, (err, user) => {
-      if (err || !user) {
-        return reject({
-          statusCode: 401,
-          code: 'User not found',
-        });
-      }
+userSchema.statics.login = function login({ username, password }) {
+  this.findOne({ username })
 
-      return compareToEncryptedString(user.password, query.password)
+  .then(user => (
+    !user ? Promise.reject({
+      statusCode: 401,
+      code: 'User not found',
+    }) : compareToEncryptedString(user.password, password)
 
-        .then(() => (
-          resolve(user)
-        ));
-    });
-  });
+    .then(() => (
+      Promise.resolve(user)
+    ))
+  ));
 };
 
 userSchema.pre('save', function preSave(next) {
