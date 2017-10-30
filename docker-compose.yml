@@ -1,5 +1,5 @@
 web:
-  build: Dockerfile.dev
+  build: .
   ports:
     - '3000:3000'
   working_dir: /usr/src/app
