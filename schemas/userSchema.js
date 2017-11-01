@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-module.exports = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   name: String,
   surname: String,
   lastname: String,
@@ -48,6 +48,20 @@ module.exports = new mongoose.Schema({
   },
 });
 
+userSchema.index({
+  email: 1,
+});
+
+userSchema.index({
+  username: 1,
+});
+
+userSchema.index({
+  email: 1,
+  username: 1,
+});
+
+module.exports = userSchema;
 
 // Mappings
 

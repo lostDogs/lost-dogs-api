@@ -8,7 +8,7 @@ const userSchema = require('../schemas/userSchema');
 const { userMappings } = require('../schemas/userSchema');
 
 // libs
-const { generateArrayFromObject, validateRequiredFields, encryptString, compareToEncryptedString } = require('../utils/common');
+const { generateArrayFromObject, validateRequiredFields, encryptString, compareToEncryptedString } = require('../lib/common');
 
 // AWS
 const s3 = require('../aws').s3(process.env.S3_BUCKET);
@@ -89,7 +89,7 @@ userSchema.statics.updateMap = body => (
 );
 
 userSchema.statics.validateToken = function validateToken({ username, token }) {
-  this.findOne({ username })
+  return this.findOne({ username })
 
     .then(user => (!user ? Promise.reject({
       statusCode: 401,
@@ -103,7 +103,7 @@ userSchema.statics.validateToken = function validateToken({ username, token }) {
 };
 
 userSchema.statics.login = function login({ username, password }) {
-  this.findOne({ username })
+  return this.findOne({ username })
 
   .then(user => (
     !user ? Promise.reject({
@@ -137,23 +137,6 @@ userSchema.pre('save', function preSave(next) {
   }
 
   return next();
-});
-
-userSchema.index({
-  _id: 1,
-});
-
-userSchema.index({
-  email: 1,
-});
-
-userSchema.index({
-  username: 1,
-});
-
-userSchema.index({
-  email: 1,
-  username: 1,
 });
 
 module.exports = mongoose.model('users', userSchema);

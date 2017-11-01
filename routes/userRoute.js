@@ -6,7 +6,7 @@ const router = express.Router();
 
 // users controller
 const { create, login, retrieve, update, deleteItem, updateAvatar } = require('../controllers/userController')();
-const userAuthMiddleware = require('../utils/token').middleware({ reqUser: true });
+const userAuthMiddleware = require('../lib/token').middleware({ reqUser: true });
 
 // Session managment
 router.post('/', create);

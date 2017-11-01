@@ -24,8 +24,7 @@
     "mongoose": "^4.8.7",
     "morgan": "^1.8.1",
     "object-mapper": "^3.0.1",
-    "uuid-v4": "^0.1.0",
-    "validator": "^8.0.0"
+    "uuid-v4": "^0.1.0"
   },
   "devDependencies": {
     "eslint": "^3.8.1",

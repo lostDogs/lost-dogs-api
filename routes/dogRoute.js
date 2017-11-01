@@ -6,8 +6,8 @@ const router = express.Router();
 
 // dogs controller
 const { search, retrieve, create, update, deleteItem } = require('../controllers/dogController')();
-const annonAuthMiddleware = require('../utils/token').middleware({ reqUser: false });
-const userAuthMiddleware = require('../utils/token').middleware({ reqUser: true });
+const annonAuthMiddleware = require('../lib/token').middleware({ reqUser: false });
+const userAuthMiddleware = require('../lib/token').middleware({ reqUser: true });
 
 // Public
 router.get('/', annonAuthMiddleware, search);

@@ -3,7 +3,7 @@ const CrudManager = require('./crudManager');
 const Dog = require('../models/Dog');
 
 // libs
-const { handle } = require('../utils/errorHandler');
+const { handle } = require('../lib/errorHandler');
 
 module.exports = () => {
   const crudManager = CrudManager(Dog);
@@ -36,7 +36,7 @@ module.exports = () => {
     Dog.updateMap(req.body)
 
     .then(updateBody => (
-      Dog.findOne({ reporter_id: req.jwtPayload.username })
+      Dog.findOne({ id: req.params.id, reporter_id: req.jwtPayload.username })
 
       .then(dog => (!dog ? Promise.reject({
         statusCode: 401,
@@ -57,7 +57,7 @@ module.exports = () => {
     ))
   );
 
-  const retrieve = (req, res) => {
+  const retrieve = (req, res) => (
     crudManager.retrieve(req.params.id)
 
       .then(dog => (
@@ -66,10 +66,10 @@ module.exports = () => {
 
       .catch(err => (
         handle(err, res)
-      ));
-  };
+      ))
+  );
 
-  const deleteItem = (req, res) => {
+  const deleteItem = (req, res) => (
     crudManager.deleteItem(req.params.id)
 
     .then(() => (
@@ -78,8 +78,8 @@ module.exports = () => {
 
     .catch(err => (
       handle(err, res)
-    ));
-  };
+    ))
+  );
 
   // const updateImage = (req, res) => {
   //   Dog.

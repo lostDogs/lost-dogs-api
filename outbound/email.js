@@ -1,5 +1,5 @@
 // libs
-const hugs = require('../utils/common').hugs;
+const hugs = require('../lib/common').hugs;
 const templates = require('../config/templates');
 const ses = require('../aws').ses;
 

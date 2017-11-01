@@ -1,5 +1,5 @@
 // libs
-const { validatePagination } = require('../utils/common');
+const { validatePagination } = require('../lib/common');
 
 module.exports = (model) => {
   const retrieve = id => (
@@ -8,9 +8,7 @@ module.exports = (model) => {
     .then(item => (!item ? Promise.reject({
       statusCode: 404,
       code: 'Not found.',
-    }) : item.getInfo()))
-
-    .catch(() => (
+    }) : item.getInfo()), () => (
       Promise.reject({
         statusCode: 500,
         code: 'Error while retrieving object.',
@@ -25,7 +23,7 @@ module.exports = (model) => {
       model.create(createBody)
 
       .then(item => (
-        Promise.reolve(item.getInfo())
+        Promise.resolve(item.getInfo())
       ))
 
       .catch(() => (
@@ -57,18 +55,18 @@ module.exports = (model) => {
       ));
   };
 
-  const search = ({ searchTerms = ' ', page = 0, pageSize = 12 }) => (
-    validatePagination(page, pageSize)
+  const search = query => (
+    validatePagination(query)
 
     .then(({ skip, limit }) => {
       const searchRequest = type => (
         model[type]({
-          $and: searchTerms.trim().split(' ').map(term => ({
+          $and: (query.searchTerms || ' ').trim().split(' ').map(term => ({
             search: {
               $regex: term,
               $options: 'i',
             },
-          })),
+          })).concat(model.extraFields(query)),
         }).limit(limit).skip(skip).sort({ created: -1 })
         .exec()
       );

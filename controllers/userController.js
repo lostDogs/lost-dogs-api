@@ -2,8 +2,8 @@
 const User = require('../models/User');
 
 // libs
-const { handle } = require('../utils/errorHandler');
-const { signToken } = require('../utils/token');
+const { handle } = require('../lib/errorHandler');
+const { signToken } = require('../lib/token');
 
 // outbound
 const { verifyAccount } = require('../outbound/email');
@@ -98,8 +98,8 @@ module.exports = () => {
     ))
   );
 
-  const retrieve = ({ params }, res) => (
-    User.findOne({ username: params.username })
+  const retrieve = ({ params: { username } }, res) => (
+    User.findOne({ username })
 
     .then(user => (
       (!user ? handle({
@@ -113,16 +113,16 @@ module.exports = () => {
     ))
   );
 
-  const update = (req, res) => (
-    User.updateMap(req.body)
+  const update = ({ body, params: { username } }, res) => (
+    User.updateMap(body)
 
     .then(updateBody => (
-      User.findOneAndUpdate({ username: req.params.username }, updateBody)
+      User.findOneAndUpdate({ username }, updateBody)
       .then(item => (!item ?
         handle({
           statusCode: 404,
           code: 'Not found.',
-        }, res) : retrieve(req, res)
+        }, res) : retrieve({ params: { username } }, res)
       ))
     ))
 

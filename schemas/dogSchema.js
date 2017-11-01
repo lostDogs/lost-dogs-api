@@ -1,6 +1,7 @@
+// dependencies
 const mongoose = require('mongoose');
 
-module.exports = new mongoose.Schema({
+const dogSchema = new mongoose.Schema({
   name: String,
   kind_id: String,
   description: String,
@@ -9,22 +10,27 @@ module.exports = new mongoose.Schema({
     default: Date.now,
   },
 
+  // GEOJSON to manage locations
   location: {
-    address: String,
-    latLong: { lat: Number, lng: Number },
+    type: {
+      type: String,
+      default: 'Point',
+    },
+    coordinates: [Number],
   },
+
+  address: String,
   male: Boolean,
-  size_Id: String,
+  size_id: String,
   color: String,
-  pattern_Id: String,
-  accessories_Id: [String],
+  pattern_id: String,
+  accessories_id: [String],
   lost: Boolean,
   reward: Boolean,
 
   search: Array,
   reporter_id: String,
-  image_url: String,
-  uploadImageUrl: String,
+  images: [String],
 
   // doc managment
   created_at: {
@@ -38,6 +44,20 @@ module.exports = new mongoose.Schema({
   },
 });
 
+dogSchema.index({
+  name: 1,
+});
+
+dogSchema.index({
+  reporter_id: 1,
+});
+
+dogSchema.index({
+  location: '2dsphere',
+});
+
+module.exports = dogSchema;
+
 module.exports.dogMappings = {
   createMap: {
     name: 'name',
@@ -46,13 +66,20 @@ module.exports.dogMappings = {
     found_date: 'found_date',
     imageFileType: 'fileType',
     reporter_id: 'reporter_id',
-    'location.lat': 'location.lat',
-    'location.lng': 'location.lng',
+    images: {
+      key: 'images',
+      default: [],
+    },
+    'location.type': {
+      key: 'location.type',
+      default: 'Point',
+    },
+    'location.coordinates': 'location.coordinates',
     male: 'male',
-    size_Id: 'size_Id',
-    pattern_Id: 'pattern_Id',
+    size_id: 'size_id',
+    pattern_id: 'pattern_id',
     color: 'color',
-    accessories_Id: 'accessories_Id',
+    accessories_id: 'accessories_id',
     lost: 'lost',
     reward: 'reward',
   },
@@ -61,19 +88,19 @@ module.exports.dogMappings = {
     _id: '_id',
     name: 'name',
     kind: 'kind',
+    images: 'images',
     description: 'description',
     found_date: 'found_date',
     reporter_id: 'reporter_id',
     created_at: 'created_at',
     uploadImageUrl: 'uploadImageUrl',
     image_url: 'image_url',
-    'location.lat': 'location.lat',
-    'location.lng': 'location.lng',
+    'location.coordinates': 'location.coordinates',
     male: 'male',
-    size_Id: 'size_Id',
-    pattern_Id: 'pattern_Id',
+    size_id: 'size_id',
+    pattern_id: 'pattern_id',
     color: 'color',
-    accessories_Id: 'accessories_Id',
+    accessories_id: 'accessories_id',
     lost: 'lost',
     reward: 'reward',
   },

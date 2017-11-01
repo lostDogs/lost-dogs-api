@@ -24,13 +24,11 @@ const users = require('./routes/userRoute');
 /**
  * Connect to MongoDB.
  */
-mongoose.connect(process.env.MONGOLAB_URI || `${process.env.MONGODB_PORT_27017_TCP_ADDR}/lostdogs`);
-mongoose.connection.on('error', () => {
-  console.error('MongoDB Connection Error. Please make sure that MongoDB is running.');
-  process.exit(1);
-});
+mongoose.connect(process.env.MONGOLAB_URI || `mongodb://${process.env.MONGODB_PORT_27017_TCP_ADDR}/lostdogs`, {
+  useMongoClient: true,
+})
 
-mongoose.connection.on('connected', () => {
+.then(() => {
   console.log('Connected to MongoDB');
 
   app.set('port', process.env.PORT || 3000);
@@ -49,4 +47,9 @@ mongoose.connection.on('connected', () => {
   app.listen(app.get('port'), () => {
     console.log('Express server listening on port %d in %s mode', app.get('port'), app.get('env'));
   });
+})
+
+.catch(() => {
+  console.error('MongoDB Connection Error. Please make sure that MongoDB is running.');
+  process.exit(1);
 });

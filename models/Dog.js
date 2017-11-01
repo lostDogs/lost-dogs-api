@@ -9,10 +9,13 @@ const dogSchema = require('../schemas/dogSchema');
 const { dogMappings } = require('../schemas/dogSchema');
 
 // libs
-const { generateArrayFromObject, validateRequiredFields, encryptString } = require('../utils/common');
+const { generateArrayFromObject, validateRequiredFields, encryptString } = require('../lib/common');
 
 // AWS
-const s3 = require('../aws/s3')(process.env.S3_BUCKET);
+const s3 = require('../aws/').s3(process.env.S3_BUCKET);
+
+// static values
+const strictFields = 'male size_id color pattern_id accessories_id lost reward'.split(' ');
 
 dogSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, dogMappings.infoMap);
@@ -48,28 +51,48 @@ dogSchema.methods.updateImage = function updateImage(fileType) {
     });
 };
 
+dogSchema.statics.extraFields = (query) => {
+  const terms = (strictFields || []).reduce((acc, term) => (
+    query[term] ? acc.concat([{
+      [term]: query[term],
+    }]) : acc
+  ), []);
+
+  return terms.concat(query.location && query.maxDistance ? [{
+    location: {
+      $near: {
+        $maxDistance: query.maxDistance,
+        $geometry: { type: 'Point', coordinates: query.location.split(',').map(data => +data) },
+      },
+    },
+  }] : []);
+};
+
 dogSchema.statics.createMap = body => (
   validateRequiredFields(objectMapper(body, dogMappings.createMap), dogMappings.createRequiredFieldsList)
 
   // get sign object from s3
   .then(createBody => (
     // encript filename
-    encryptString(`dog-${uuid()}-${Date.now()}`)
+    Promise.all(createBody.images(image => (
+      encryptString(`dog-${body.reporter_id}-${uuid()}-${Date.now()}`)
 
-    .then(fileName => (
-      s3.signObject({
-        fileName,
+      .then(fileName => (
+        s3.signObject({
+          fileName,
 
-        // mimetype
-        fileType: createBody.fileType,
-      })
-    ))
+          // mimetype
+          fileType: image,
+        })
+      ))
+    )))
 
-    .then(avatar => (
+    .then(avatars => (
       Promise.resolve(Object.assign(createBody, {
-        uploadImageUrl: avatar.signedRequest,
-        image_url: avatar.url,
-        found_date: moment(createBody.found_date, 'YYYY-MM-DD HH:mm').toDate(),
+        images: avatars.map(({ signedRequest, url }) => ({
+          uploadImageUrl: signedRequest,
+          image_url: url,
+        })),
       }))
     ))
   ))
@@ -88,18 +111,6 @@ dogSchema.pre('save', function preSave(next) {
   this.updated_at = Date.now();
 
   next();
-});
-
-dogSchema.index({
-  _id: 1,
-});
-
-dogSchema.index({
-  name: 1,
-});
-
-dogSchema.index({
-  reporter_id: 1,
 });
 
 module.exports = mongoose.model('dogs', dogSchema);
