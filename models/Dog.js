@@ -74,7 +74,7 @@ dogSchema.statics.createMap = body => (
   // get sign object from s3
   .then(createBody => (
     // encript filename
-    Promise.all(createBody.images(image => (
+    Promise.all(createBody.images.map(image => (
       encryptString(`dog-${body.reporter_id}-${uuid()}-${Date.now()}`)
 
       .then(fileName => (
