@@ -6,22 +6,114 @@ const ses = require('../aws').ses;
 module.exports.verifyAccount = user => (
   templates.load('verifyAccount')
 
-  .then(({ metadata, content }) => (
+  .then(({ from, subject, bodyCharset, content }) => (
     ses.sendEmail({
       fromInfo: {
-        from: metadata.from,
+        from,
       },
       content: {
-        subject: metadata.subject,
+        subject,
         body: {
           data: hugs(user, content),
-          charset: metadata.bodyCharset,
+          charset: bodyCharset,
         },
       },
       recipientInfo: {
         to: [user.email],
       },
     })
+  ))
+
+  .catch(err => (
+    Promise.reject({
+      statusCode: 500,
+      code: err.code,
+    })
+  ))
+);
+
+module.exports.foundEmail = ({ lostUser, reporterUser, transaction }) => (
+  Promise.all([templates.load('foundEmailToOwner'), templates.load('foundEmailToReporter')])
+
+  .then(([owner, reporter]) => (
+    Promise.all([
+      ses.sendEmail({
+        fromInfo: {
+          from: owner.from,
+        },
+        content: {
+          subject: owner.subject,
+          body: {
+            data: hugs({ owner: lostUser, metadata: owner, transaction, reporter: reporterUser }, owner.content),
+            charset: owner.bodyCharset,
+          },
+        },
+        recipientInfo: {
+          to: [lostUser.email],
+        },
+      }),
+      ses.sendEmail({
+        fromInfo: {
+          from: reporter.from,
+        },
+        content: {
+          subject: reporter.subject,
+          body: {
+            data: hugs({ reporter: reporterUser, metadata: reporter, transaction }, reporter.content),
+            charset: reporter.bodyCharset,
+          },
+        },
+        recipientInfo: {
+          to: [reporterUser.email],
+        },
+      }),
+    ])
+  ))
+
+  .catch(err => (
+    Promise.reject({
+      statusCode: 500,
+      code: err.code,
+    })
+  ))
+);
+
+module.exports.lostEmail = ({ lostUser, reporterUser, transaction }) => (
+  Promise.all([templates.load('lostEmailToOwner'), templates.load('lostEmailToReporter')])
+
+  .then(([owner, reporter]) => (
+    Promise.all([
+      ses.sendEmail({
+        fromInfo: {
+          from: owner.from,
+        },
+        content: {
+          subject: owner.subject,
+          body: {
+            data: hugs({ owner: lostUser, metadata: owner, transaction }, owner.content),
+            charset: owner.bodyCharset,
+          },
+        },
+        recipientInfo: {
+          to: [lostUser.email],
+        },
+      }),
+      ses.sendEmail({
+        fromInfo: {
+          from: reporter.from,
+        },
+        content: {
+          subject: reporter.subject,
+          body: {
+            data: hugs({ reporter: reporterUser, metadata: reporter, transaction }, reporter.content),
+            charset: reporter.bodyCharset,
+          },
+        },
+        recipientInfo: {
+          to: [reporterUser.email],
+        },
+      }),
+    ])
   ))
 
   .catch(err => (

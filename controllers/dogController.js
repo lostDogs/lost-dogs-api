@@ -1,6 +1,7 @@
 // models
 const CrudManager = require('./crudManager');
 const Dog = require('../models/Dog');
+const Transaction = require('../models/Transaction');
 
 // libs
 const { handle } = require('../lib/errorHandler');
@@ -81,6 +82,46 @@ module.exports = () => {
     ))
   );
 
+  const found = (req, res) => (
+    crudManager.retrieve(req.params.id)
+
+    .then(dog => (
+      Transaction.found(Object.assign(req.body, {
+        lost_id: req.user.username,
+      }), dog)
+    ))
+
+    .then(() => (
+      res.status(201).json({
+        success: true,
+      })
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
+  const lost = (req, res) => (
+    crudManager.retrieve(req.params.id)
+
+    .then(dog => (
+      Transaction.lost(Object.assign(req.body, {
+        found_id: req.user.username,
+      }), dog)
+    ))
+
+    .then(() => (
+      res.status(201).json({
+        success: true,
+      })
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
   // const updateImage = (req, res) => {
   //   Dog.
   //   user.updateAvatar(req.body.fileType)
@@ -98,5 +139,7 @@ module.exports = () => {
     update,
     deleteItem,
     search,
+    found,
+    lost,
   };
 };

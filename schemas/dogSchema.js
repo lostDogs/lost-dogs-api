@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const dogSchema = new mongoose.Schema({
   name: String,
-  kind_id: String,
+  kind: String,
   description: String,
   found_date: {
     type: Date,
@@ -26,11 +26,14 @@ const dogSchema = new mongoose.Schema({
   pattern_id: String,
   accessories_id: [String],
   lost: Boolean,
-  reward: Boolean,
+  reward: String,
 
   search: Array,
   reporter_id: String,
-  images: [String],
+  images: [{
+    uploadImageUrl: String,
+    image_url: String,
+  }],
 
   // doc managment
   created_at: {
@@ -64,7 +67,6 @@ module.exports.dogMappings = {
     kind: 'kind',
     description: 'description',
     found_date: 'found_date',
-    imageFileType: 'fileType',
     reporter_id: 'reporter_id',
     images: {
       key: 'images',
@@ -82,6 +84,7 @@ module.exports.dogMappings = {
     accessories_id: 'accessories_id',
     lost: 'lost',
     reward: 'reward',
+    address: 'address',
   },
 
   infoMap: {
@@ -93,8 +96,6 @@ module.exports.dogMappings = {
     found_date: 'found_date',
     reporter_id: 'reporter_id',
     created_at: 'created_at',
-    uploadImageUrl: 'uploadImageUrl',
-    image_url: 'image_url',
     'location.coordinates': 'location.coordinates',
     male: 'male',
     size_id: 'size_id',
@@ -103,7 +104,8 @@ module.exports.dogMappings = {
     accessories_id: 'accessories_id',
     lost: 'lost',
     reward: 'reward',
+    address: 'address',
   },
 
-  createRequiredFieldsList: 'name kind found_date fileType reporter_id'.split(' '),
+  createRequiredFieldsList: 'name kind found_date reporter_id'.split(' '),
 };

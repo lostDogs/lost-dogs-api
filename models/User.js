@@ -47,6 +47,10 @@ userSchema.methods.updateAvatar = function updateAvatar(fileType) {
     });
 };
 
+userSchema.statics.findByUsername = function findByUsername(username) {
+  return this.findOne({ username });
+};
+
 userSchema.statics.createMap = body => (
   validateRequiredFields(objectMapper(body, userMappings.createMap), userMappings.createRequiredFieldsList)
 
@@ -105,16 +109,15 @@ userSchema.statics.validateToken = function validateToken({ username, token }) {
 userSchema.statics.login = function login({ username, password }) {
   return this.findOne({ username })
 
-  .then(user => (
-    !user ? Promise.reject({
+    .then(user => (!user ? Promise.reject({
       statusCode: 401,
       code: 'User not found',
     }) : compareToEncryptedString(user.password, password)
 
-    .then(() => (
-      Promise.resolve(user)
-    ))
-  ));
+      .then(() => (
+        Promise.resolve(user)
+      ))
+    ));
 };
 
 userSchema.pre('save', function preSave(next) {

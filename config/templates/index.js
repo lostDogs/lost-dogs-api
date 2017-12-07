@@ -4,24 +4,26 @@ const path = require('path');
 
 // libs
 const notifications = {
+  common: {
+    appName: process.env.APP_NAME,
+    from: process.env.EMAIL_NO_REPLY,
+    subject: {
+      data: 'Notifiacion Lostdog.',
+    },
+  },
   verifyAccount: {
-    metadata: {
-      from: process.env.EMAIL_NO_REPLY,
-      subject: {
-        data: 'Bienvenido a Lostdog.',
-      },
+    subject: {
+      data: 'Bienvenido a Lostdog.',
     },
   },
 };
 
-module.exports.load = (name) => {
-  const info = notifications[name];
-
-  return new Promise((resolve, reject) => (
+module.exports.load = name => (
+  new Promise((resolve, reject) => (
     fs.readFile(path.join(__dirname, `./${name}.html`), (err, fileData) => (
-      err ? reject(err) : resolve(Object.assign(info, {
+      err ? reject(err) : resolve(Object.assign({}, notifications.common, notifications[name], {
         content: fileData.toString(),
       }))
     ))
-  ));
-};
+  ))
+);

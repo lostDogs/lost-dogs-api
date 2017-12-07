@@ -59,17 +59,20 @@ module.exports = (model) => {
     validatePagination(query)
 
     .then(({ skip, limit }) => {
-      const searchRequest = type => (
-        model[type]({
+      const searchRequest = (type) => {
+        const dbQuery = model[type]({
           $and: (query.searchTerms || ' ').trim().split(' ').map(term => ({
             search: {
               $regex: term,
               $options: 'i',
             },
           })).concat(model.extraFields(query)),
-        }).limit(limit).skip(skip).sort({ created: -1 })
-        .exec()
-      );
+        });
+
+        return (type !== 'count' ? dbQuery.limit(limit).skip(skip) : dbQuery)
+          .sort({ created: -1 })
+          .exec();
+      };
 
       return Promise.all([searchRequest('find'), searchRequest('count')])
 

@@ -15,7 +15,7 @@ const { generateArrayFromObject, validateRequiredFields, encryptString } = requi
 const s3 = require('../aws/').s3(process.env.S3_BUCKET);
 
 // static values
-const strictFields = 'male size_id color pattern_id accessories_id lost reward'.split(' ');
+const strictFields = 'male size_id color reporter_id pattern_id accessories_id lost reward'.split(' ');
 
 dogSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, dogMappings.infoMap);
@@ -57,6 +57,24 @@ dogSchema.statics.extraFields = (query) => {
       [term]: query[term],
     }]) : acc
   ), []);
+
+  if (query.fromDate && query.toDate) {
+    terms.push({
+      created_at: {
+        $gte: moment(query.fromDate).startOf('day').valueOf(),
+        $lt: moment(query.toDate).endOf('day').valueOf(),
+      },
+    });
+  }
+
+  if (query.date) {
+    terms.push({
+      created_at: {
+        $gte: moment(query.date).startOf('day').valueOf(),
+        $lt: moment(query.date).endOf('day').valueOf(),
+      },
+    });
+  }
 
   return terms.concat(query.location && query.maxDistance ? [{
     location: {

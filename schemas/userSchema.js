@@ -64,7 +64,6 @@ userSchema.index({
 module.exports = userSchema;
 
 // Mappings
-
 module.exports.userMappings = {
   createMap: {
     name: 'name',
