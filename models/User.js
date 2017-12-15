@@ -13,8 +13,34 @@ const { generateArrayFromObject, validateRequiredFields, encryptString, compareT
 // AWS
 const s3 = require('../aws').s3(process.env.S3_BUCKET);
 
+// outbound
+const openPay = require('../outbound/openPay');
+
 userSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, userMappings.infoMap);
+};
+
+userSchema.methods.getOpenPlayInfo = function getOpenPlayInfo({ createIfMissing = false }) {
+  return this.openPayId ? openPay.getCustomer({ customerId: this.openPayId }) :
+
+  createIfMissing ? openPay.createCustomer(this) :
+
+  Promise.reject({
+    statusCode: 404,
+    description: 'payment information not found.',
+  });
+};
+
+userSchema.methods.createCustomer = function createCustomer({ customerInfo }) {
+  return openPay.createCustomer(Object.assign(customerInfo, { _id: this.id }));
+};
+
+userSchema.methods.paymentOptions = function paymentOptions() {
+  Promise.all([this.getOpenPlayInfo(), openPay.getCads({ customerId: this.openPayId })])
+
+  .then(([customer, cards]) => (
+    Promise.resolve({ customer, cards })
+  ));
 };
 
 userSchema.methods.updateAvatar = function updateAvatar(fileType) {
@@ -45,6 +71,10 @@ userSchema.methods.updateAvatar = function updateAvatar(fileType) {
           code: 'Error while updating image',
         }));
     });
+};
+
+userSchema.methods.update = function update(updateValues) {
+  return Object.assign(this, updateValues).save();
 };
 
 userSchema.statics.findByUsername = function findByUsername(username) {

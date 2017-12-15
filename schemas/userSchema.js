@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
       zip_code: String,
       city: String,
       country: String,
+      street: String,
     },
     phone_number: {
       area_code: Number,
@@ -46,6 +47,9 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+
+  // services
+  openPayId: String,
 });
 
 userSchema.index({

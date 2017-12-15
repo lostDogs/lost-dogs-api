@@ -7,8 +7,14 @@ const transactionSchema = new mongoose.Schema({
   dog_id: mongoose.Schema.Types.ObjectId,
   status: {
     type: 'String',
-    enum: ['success', 'failed', 'pending'],
+    enum: ['unknown', 'pending', 'payment-processed', 'success', 'failed'],
     default: 'pending',
+  },
+
+  paymentId: String,
+  deleted: {
+    type: Boolean,
+    default: false,
   },
 
   // doc managment

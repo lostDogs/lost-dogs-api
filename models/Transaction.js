@@ -13,6 +13,46 @@ const { foundEmail, lostEmail } = require('../outbound/email');
 const transactionSchema = require('../schemas/transactionSchema');
 const { transactionMappings } = require('../schemas/transactionSchema');
 
+// outbound
+const openPay = require('../outbound/openPay');
+
+transactionSchema.methods.getInfo = function getInfo() {
+  return objectMapper(this, transactionMappings.infoMap);
+};
+
+transactionSchema.methods.pay = function pay({ user, body: { saveCard, customerInfo = {}, fromUser = true, paymentInfo } }) {
+  return (fromUser ? user.getOpenPlayInfo({ createIfMissing: true }) : user.createCustomer({ customerInfo }))
+
+  .then(customer => (
+    openPay.createCharge(Object.assign(paymentInfo, {
+      customerId: customer.id,
+      order_id: `tid-${this.id}`,
+    }))
+
+    .then(paymentResult => (
+      this.update({ paymentId: paymentResult.id, status: 'payment-processed' })
+
+      .then(() => (
+        Promise.resolve(paymentResult)
+      ))
+    ))
+
+    .then(paymentResult => (
+      saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
+        customerId: customer.id,
+      }, paymentInfo))
+
+      .then(() => (
+        Promise.resolve(paymentResult)
+      ))
+    ))
+  ));
+};
+
+transactionSchema.methods.update = function update(updateValues) {
+  return Object.assign(this, updateValues).save();
+};
+
 transactionSchema.statics.found = function found(body, { reporter_id, _id: id }) {
   return validateRequiredFields(Object.assign(body, {
     found_id: reporter_id,

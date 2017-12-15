@@ -148,6 +148,14 @@ module.exports = () => {
     ))
   );
 
+  const getPaymentOptions = ({ user }, res) => (
+    user.paymentOptions()
+
+    .then(paymentOptions => (
+      res.json(paymentOptions)
+    ))
+  );
+
   const updateAvatar = ({ user, body = {} }, res) => (
     user.updateAvatar(body.fileType)
 
@@ -167,5 +175,6 @@ module.exports = () => {
     deleteItem,
     login,
     updateAvatar,
+    getPaymentOptions,
   };
 };
