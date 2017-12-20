@@ -11,8 +11,8 @@ module.exports = () => {
   const retrieve = (req, res) => (
     crudManager.retrieve(req.params.id)
 
-      .then(dog => (
-        res.status(200).json(dog)
+      .then(transaction => (
+        res.status(200).json(transaction)
       ))
 
       .catch(err => (
@@ -21,10 +21,13 @@ module.exports = () => {
   );
 
   const pay = ({ user, body, params: { id } }, res) => (
-    crudManager.retrieve(id)
+    Transaction.findById(id)
 
     .then(transaction => (
-      transaction.pay({ user, body })
+      !transaction ? Promise.reject({
+        statusCode: 404,
+        code: 'Not found.',
+      }) : transaction.pay({ user, body })
 
       .then(paymentResult => (
         res.json({

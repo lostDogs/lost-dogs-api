@@ -2,18 +2,20 @@
 const fetch = require('node-fetch');
 
 const headers = {
-  Authentication: `Basic ${new Buffer(`${process.env.OPENPAY_API_KEY}:`).toString('base64')}`,
+  Authorization: `Basic ${new Buffer(`${process.env.OPENPAY_API_KEY}:`).toString('base64')}`,
   'Content-type': 'application/json',
 };
+
+const countryCodes = require('../config/country/countryCodes');
 
 const getAddressFromUser = ({ street, city, ext_number: extNumber, int_number: intNumber, zip_code, neighborhood, country }) => ({
   line1: street,
   line2: `#${extNumber} - #${intNumber}`,
-  line: neighborhood,
+  line3: neighborhood,
   state: city,
   postal_code: zip_code,
   city,
-  country_code: country,
+  country_code: countryCodes[country.toLowerCase()],
 });
 
 const getBaseRequest = () => (
@@ -23,12 +25,18 @@ const getBaseRequest = () => (
 const validateAndFormatResponse = response => (
   response.json()
 
-  .then(jsonResponse => (
-    response.ok ? jsonResponse : Promise.reject({
+  .then((jsonResponse) => {
+    if (response.ok) {
+      return Promise.resolve(jsonResponse);
+    }
+
+    console.log('error from openPay', jsonResponse);
+
+    return Promise.reject({
       statusCode: jsonResponse.http_code,
-      error: jsonResponse.description,
-    })
-  ), err => (
+      code: jsonResponse.description,
+    });
+  }, err => (
     Promise.reject({
       statusCode: 500,
       error: err.message,
@@ -37,7 +45,7 @@ const validateAndFormatResponse = response => (
 );
 
 module.exports = {
-  createCustomer: ({ _id: external_id, name, lastName: last_name, email, phone_number: phone, address }) => (
+  createCustomer: ({ _id: external_id, name, lastName: last_name, email, phone_number: phone, contact_info: { address } }) => (
     fetch(`${getBaseRequest()}/customers`, {
       method: 'POST',
       headers,
@@ -59,7 +67,7 @@ module.exports = {
     }).then(validateAndFormatResponse)
   ),
 
-  createCharge: ({ customerId, method = 'card', source_id: sourceId, amount, ccv2 = null, currency = 'MXN', description, order_id: orderId, device_session_id: deviceSessionId, capture = false }) => (
+  createCharge: ({ customerId, method = 'card', source_id: sourceId, amount, currency = 'MXN', description, order_id: orderId, device_session_id: deviceSessionId, capture = false }) => (
     fetch(`${getBaseRequest()}/customers/${customerId}/charges`, {
       method: 'POST',
       headers,
@@ -68,7 +76,6 @@ module.exports = {
         source_id: sourceId,
         device_session_id: deviceSessionId,
         amount,
-        ccv2,
         currency,
         description,
         order_id: orderId,

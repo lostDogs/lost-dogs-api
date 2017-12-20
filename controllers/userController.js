@@ -154,6 +154,22 @@ module.exports = () => {
     .then(paymentOptions => (
       res.json(paymentOptions)
     ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
+  const createPaymentOption = ({ user, body }, res) => (
+    user.addPaymentOption(body)
+
+    .then(cardResult => (
+      res.json(cardResult)
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
   );
 
   const updateAvatar = ({ user, body = {} }, res) => (
@@ -176,5 +192,6 @@ module.exports = () => {
     login,
     updateAvatar,
     getPaymentOptions,
+    createPaymentOption,
   };
 };

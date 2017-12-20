@@ -78,6 +78,7 @@ module.exports.userMappings = {
     'address.neighborhood': 'contact_info.address.neighborhood',
     'address.zip_code': 'contact_info.address.zip_code',
     'address.city': 'contact_info.address.city',
+    'address.street': 'contact_info.address.street',
     'address.country': 'contact_info.address.country',
     'phone_number.area_code': 'contact_info.phone_number.area_code',
     'phone_number.number': 'contact_info.phone_number.number',
@@ -97,9 +98,9 @@ module.exports.userMappings = {
     'address.zip_code': 'contact_info.address.zip_code',
     'address.city': 'contact_info.address.city',
     'address.country': 'contact_info.address.country',
+    'address.street': 'contact_info.address.street',
     'phone_number.area_code': 'contact_info.phone_number.area_code',
     'phone_number.number': 'contact_info.phone_number.number',
-
     email: 'email',
   },
   infoMap: {
@@ -112,6 +113,7 @@ module.exports.userMappings = {
     'contact_info.address.zip_code': 'address.zip_code',
     'contact_info.address.city': 'address.city',
     'contact_info.address.country': 'address.country',
+    'contact_info.address.street': 'address.street',
     'contact_info.phone_number.area_code': 'phone_number.area_code',
     'contact_info.phone_number.number': 'phone_number.number',
 

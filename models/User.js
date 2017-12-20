@@ -20,14 +20,24 @@ userSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, userMappings.infoMap);
 };
 
-userSchema.methods.getOpenPlayInfo = function getOpenPlayInfo({ createIfMissing = false }) {
+userSchema.methods.getOpenPlayInfo = function getOpenPlayInfo({ createIfMissing = false } = {}) {
   return this.openPayId ? openPay.getCustomer({ customerId: this.openPayId }) :
 
-  createIfMissing ? openPay.createCustomer(this) :
+  createIfMissing ? openPay.createCustomer(this)
+
+  .then(customer => (
+    this.update({
+      openPayId: customer.id,
+    })
+
+    .then(() => (
+      Promise.resolve(customer)
+    ))
+  )) :
 
   Promise.reject({
     statusCode: 404,
-    description: 'payment information not found.',
+    code: 'payment information not found.',
   });
 };
 
@@ -36,10 +46,24 @@ userSchema.methods.createCustomer = function createCustomer({ customerInfo }) {
 };
 
 userSchema.methods.paymentOptions = function paymentOptions() {
-  Promise.all([this.getOpenPlayInfo(), openPay.getCads({ customerId: this.openPayId })])
+  return Promise.all([this.getOpenPlayInfo(), openPay.getCads({ customerId: this.openPayId })])
 
   .then(([customer, cards]) => (
     Promise.resolve({ customer, cards })
+  ));
+};
+
+userSchema.methods.addPaymentOption = function addPaymentOption(body) {
+  return this.getOpenPlayInfo({ createIfMissing: true })
+
+  .then(customer => (
+    openPay.saveCard(Object.assign({
+      customerId: customer.id,
+    }, body))
+
+    .then(cardResult => (
+      Promise.resolve(cardResult)
+    ))
   ));
 };
 

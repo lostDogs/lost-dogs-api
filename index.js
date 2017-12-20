@@ -20,6 +20,7 @@ app.use(bodyParser.json());
 // routers
 const dogs = require('./routes/dogRoute');
 const users = require('./routes/userRoute');
+const transactions = require('./routes/transactionRoute');
 
 /**
  * Connect to MongoDB.
@@ -40,6 +41,7 @@ mongoose.connect(process.env.MONGOLAB_URI || `mongodb://${process.env.MONGODB_PO
 
   app.use('/api/dogs', dogs);
   app.use('/api/users', users);
+  app.use('/api/transactions', transactions);
 
   /**
    * Start Express server.

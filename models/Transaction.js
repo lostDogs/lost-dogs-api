@@ -20,8 +20,8 @@ transactionSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, transactionMappings.infoMap);
 };
 
-transactionSchema.methods.pay = function pay({ user, body: { saveCard, customerInfo = {}, fromUser = true, paymentInfo } }) {
-  return (fromUser ? user.getOpenPlayInfo({ createIfMissing: true }) : user.createCustomer({ customerInfo }))
+transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentInfo } }) {
+  return user.getOpenPlayInfo({ createIfMissing: true })
 
   .then(customer => (
     openPay.createCharge(Object.assign(paymentInfo, {
