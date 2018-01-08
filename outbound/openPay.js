@@ -111,4 +111,37 @@ module.exports = {
       }),
     }).then(validateAndFormatResponse)
   ),
+
+  saveBankAccount: ({ customerId, clabe, alias, holder_name: holderName }) => (
+    fetch(`${getBaseRequest()}/customers/${customerId}/bankaccounts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        clabe,
+        alias,
+        holder_name: holderName,
+      }),
+    }).then(validateAndFormatResponse)
+  ),
+
+  getBankAccounts: ({ customerId }) => (
+    fetch(`${getBaseRequest()}/customers/${customerId}/bankaccounts`, {
+      method: 'GET',
+      headers,
+    }).then(validateAndFormatResponse)
+  ),
+
+  createTransaction: ({ customerId, bank_account, orderId, amount, description }) => (
+    fetch(`${getBaseRequest()}/customers/${customerId}/payouts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        method: 'bank_account',
+        bank_account,
+        amount,
+        description,
+        order_id: orderId,
+      }),
+    }).then(validateAndFormatResponse)
+  ),
 };

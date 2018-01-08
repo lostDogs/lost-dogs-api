@@ -160,11 +160,35 @@ module.exports = () => {
     ))
   );
 
+  const getBankAccounts = ({ user }, res) => (
+    user.bankAccounts()
+
+    .then(bankAccounts => (
+      res.json(bankAccounts)
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
   const createPaymentOption = ({ user, body }, res) => (
     user.addPaymentOption(body)
 
     .then(cardResult => (
       res.json(cardResult)
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
+  const createBankAccount = ({ user, body }, res) => (
+    user.addBankAccount(body)
+
+    .then(bankAccount => (
+      res.json(bankAccount)
     ))
 
     .catch(err => (
@@ -193,5 +217,7 @@ module.exports = () => {
     updateAvatar,
     getPaymentOptions,
     createPaymentOption,
+    createBankAccount,
+    getBankAccounts,
   };
 };

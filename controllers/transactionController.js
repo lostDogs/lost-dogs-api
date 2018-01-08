@@ -42,6 +42,30 @@ module.exports = () => {
     ))
   );
 
+  const reward = ({ user, params: { id, identifier }, body }, res) => (
+    Transaction.findById(id)
+
+    .then(transaction => (
+      !transaction ? Promise.reject({
+        statusCode: 404,
+        code: 'Not found.',
+      }) : !transaction.paymentId ? Promise.reject({
+        statusCode: 400,
+        code: 'Payment not registered.',
+      }) : transaction.qrIdentifier !== identifier ? Promise.reject({
+        statusCode: 400,
+        code: 'Identifier does not match',
+      }) : user.username !== transaction.found_id ? Promise.reject({
+        statusCode: 400,
+        code: 'User does not match',
+      }) : transaction.reward({ user, body })
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
   const deleteItem = (req, res) => (
     crudManager.deleteItem(req.params.id)
 
@@ -58,5 +82,6 @@ module.exports = () => {
     retrieve,
     deleteItem,
     pay,
+    reward,
   };
 };

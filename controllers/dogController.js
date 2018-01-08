@@ -82,18 +82,19 @@ module.exports = () => {
     ))
   );
 
-  const found = (req, res) => (
-    crudManager.retrieve(req.params.id)
+  const found = ({ user, body, params }, res) => (
+    crudManager.retrieve(params.id)
 
     .then(dog => (
-      Transaction.found(Object.assign(req.body, {
-        lost_id: req.user.username,
-      }), dog)
+      Transaction.found(Object.assign(body, {
+        lost_id: user.username,
+      }), dog, user)
     ))
 
-    .then(() => (
+    .then(paymentResult => (
       res.status(201).json({
         success: true,
+        paymentResult,
       })
     ))
 

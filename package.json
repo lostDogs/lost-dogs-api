@@ -25,6 +25,7 @@
     "morgan": "^1.8.1",
     "node-fetch": "^1.7.3",
     "object-mapper": "^3.0.1",
+    "qrcode": "^1.2.0",
     "uuid-v4": "^0.1.0"
   },
   "devDependencies": {

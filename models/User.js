@@ -67,6 +67,28 @@ userSchema.methods.addPaymentOption = function addPaymentOption(body) {
   ));
 };
 
+userSchema.methods.bankAccounts = function bankAccounts() {
+  return Promise.all([this.getOpenPlayInfo(), openPay.getBankAccounts({ customerId: this.openPayId })])
+
+  .then(([customer, accounts]) => (
+    Promise.resolve({ customer, accounts })
+  ));
+};
+
+userSchema.methods.addBankAccount = function addBankAccount(body) {
+  return this.getOpenPlayInfo({ createIfMissing: true })
+
+  .then(customer => (
+    openPay.saveBankAccount(Object.assign({
+      customerId: customer.id,
+    }, body))
+
+    .then(bankAccount => (
+      Promise.resolve(bankAccount)
+    ))
+  ));
+};
+
 userSchema.methods.updateAvatar = function updateAvatar(fileType) {
   // encript filename
   return encryptString(`${this.username}-${uuid()}-${Date.now()}`)

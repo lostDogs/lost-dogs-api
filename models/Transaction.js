@@ -1,6 +1,8 @@
 // dependencies
 const mongoose = require('mongoose');
 const objectMapper = require('object-mapper');
+const qrCode = require('qrcode');
+const uuid = require('uuid-v4');
 
 // models
 const User = require('./User');
@@ -30,7 +32,7 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
     }))
 
     .then(paymentResult => (
-      this.update({ paymentId: paymentResult.id, status: 'payment-processed' })
+      this.update({ paymentId: paymentResult.id, status: 'payment-processed', amount: paymentInfo.amount })
 
       .then(() => (
         Promise.resolve(paymentResult)
@@ -49,36 +51,73 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
   ));
 };
 
+transactionSchema.methods.reward = function reward({ user, body }) {
+  const toUser = (+this.amount - (+this.amount * 0.20)).toFixed(2);
+  return user.getOpenPlayInfo({ createIfMissing: true })
+
+  .then(customer => (
+    openPay.createTransaction(Object.assign(body, {
+      customerId: customer.id,
+      amount: toUser,
+      orderId: `tid-payout-${this.id}`,
+    }))
+  ))
+
+  .then(paymentResult => (
+    Promise.resolve(paymentResult)
+  ));
+};
+
 transactionSchema.methods.update = function update(updateValues) {
   return Object.assign(this, updateValues).save();
 };
 
-transactionSchema.statics.found = function found(body, { reporter_id, _id: id }) {
+transactionSchema.statics.found = function found(body, { reporter_id, _id: id }, user) {
   return validateRequiredFields(Object.assign(body, {
     found_id: reporter_id,
     dog_id: id,
   }), transactionMappings.createRequiredFieldsList)
 
     .then(() => (
-      this.create(objectMapper(Object.assign(body, {
+      body.paymentInfo ? this.create(objectMapper(Object.assign(body, {
         found_id: reporter_id,
         dog_id: id,
+        qrIdentifier: uuid(),
       }), transactionMappings.createMap))
 
       .then(transaction => (
-        Promise.all([
-          User.findByUsername(transaction.lost_id),
-          User.findByUsername(transaction.found_id),
-        ])
+        transaction.pay({ user, body })
 
-        .then(([lostUser, reporterUser]) => (
-          foundEmail({
-            lostUser,
-            reporterUser,
-            transaction,
-          })
+        .then(paymentResult => (
+          Promise.all([
+            User.findByUsername(transaction.lost_id),
+            User.findByUsername(transaction.found_id),
+          ])
+
+          .then(([lostUser, reporterUser]) => (
+            qrCode.toDataURL(JSON.stringify({
+              identifier: transaction.qrIdentifier,
+              transactionId: transaction.id,
+            }))
+
+            .then(qrUrl => (
+              foundEmail({
+                lostUser,
+                qrUrl,
+                reporterUser,
+                transaction,
+              })
+
+              .then(() => (
+                Promise.resolve(paymentResult)
+              ))
+            ))
+          ))
         ))
-      ))
+      )) : Promise.reject({
+        statusCode: 400,
+        code: 'Paymenf information is required',
+      })
     ));
 };
 
@@ -89,7 +128,9 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
   }), transactionMappings.createRequiredFieldsList)
 
     .then(createBody => (
-      this.create(createBody)
+      this.create(Object.assign(createBody, {
+        qrIdentifier: uuid(),
+      }))
 
       .then(transaction => (
         Promise.all([
@@ -98,11 +139,19 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
         ])
 
         .then(([lostUser, reporterUser]) => (
-          lostEmail({
-            lostUser,
-            reporterUser,
-            transaction,
-          })
+          qrCode.toDataURL(JSON.stringify({
+            identifier: transaction.qrIdentifier,
+            transactionId: transaction.id,
+          }))
+
+          .then(qrUrl => (
+            lostEmail({
+              lostUser,
+              qrUrl,
+              reporterUser,
+              transaction,
+            })
+          ))
         ))
       ))
     ));

@@ -32,7 +32,7 @@ module.exports.verifyAccount = user => (
   ))
 );
 
-module.exports.foundEmail = ({ lostUser, reporterUser, transaction }) => (
+module.exports.foundEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
   Promise.all([templates.load('foundEmailToOwner'), templates.load('foundEmailToReporter')])
 
   .then(([owner, reporter]) => (
@@ -44,7 +44,7 @@ module.exports.foundEmail = ({ lostUser, reporterUser, transaction }) => (
         content: {
           subject: owner.subject,
           body: {
-            data: hugs({ owner: lostUser, metadata: owner, transaction, reporter: reporterUser }, owner.content),
+            data: hugs({ owner: lostUser, qrUrl, metadata: owner, transaction, reporter: reporterUser }, owner.content),
             charset: owner.bodyCharset,
           },
         },
@@ -78,7 +78,7 @@ module.exports.foundEmail = ({ lostUser, reporterUser, transaction }) => (
   ))
 );
 
-module.exports.lostEmail = ({ lostUser, reporterUser, transaction }) => (
+module.exports.lostEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
   Promise.all([templates.load('lostEmailToOwner'), templates.load('lostEmailToReporter')])
 
   .then(([owner, reporter]) => (
@@ -90,7 +90,7 @@ module.exports.lostEmail = ({ lostUser, reporterUser, transaction }) => (
         content: {
           subject: owner.subject,
           body: {
-            data: hugs({ owner: lostUser, metadata: owner, transaction }, owner.content),
+            data: hugs({ owner: lostUser, qrUrl, metadata: owner, transaction }, owner.content),
             charset: owner.bodyCharset,
           },
         },

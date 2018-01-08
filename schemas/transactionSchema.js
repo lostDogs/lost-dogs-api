@@ -10,8 +10,11 @@ const transactionSchema = new mongoose.Schema({
     enum: ['unknown', 'pending', 'payment-processed', 'success', 'failed'],
     default: 'pending',
   },
+  amount: String,
 
+  qrIdentifier: String,
   paymentId: String,
+
   deleted: {
     type: Boolean,
     default: false,
@@ -32,6 +35,7 @@ module.exports.transactionMappings = {
     found_id: 'found_id',
     dog_id: 'dog_id',
     status: 'status',
+    qrIdentifier: 'qrIdentifier',
   },
   updateMap: {
     lost_id: 'lost_id',
