@@ -47,7 +47,15 @@ module.exports = () => {
           verifyAccount(newUser)
 
           .then(() => (
-            res.status(201).json(Object.assign(newUser.getInfo(), { uploadAvatarUrl }))
+            signToken({
+              username: newUser.username,
+              timestamp: Date.now(),
+              token: newUser.token,
+            })
+          ))
+
+          .then(userToken => (
+            res.status(201).json(Object.assign(newUser.getInfo(), { uploadAvatarUrl, token: userToken }))
           ), err => (
             handle(err, res)
           ))

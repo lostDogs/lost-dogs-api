@@ -190,8 +190,11 @@ userSchema.statics.login = function login({ username, password }) {
       code: 'User not found',
     }) : compareToEncryptedString(user.password, password)
 
-      .then(() => (
-        Promise.resolve(user)
+      .then(isMatch => (
+        !isMatch ? Promise.resolve(user) : Promise.reject({
+          statusCode: 401,
+          code: 'Wrong user or password',
+        })
       ))
     ));
 };

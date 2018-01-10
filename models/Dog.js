@@ -67,6 +67,12 @@ dogSchema.statics.extraFields = (query) => {
     });
   }
 
+  if (query.kind) {
+    terms.push({
+      kind: { $in: query.kind.split(',') },
+    });
+  }
+
   if (query.date) {
     terms.push({
       created_at: {

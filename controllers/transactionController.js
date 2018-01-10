@@ -61,6 +61,10 @@ module.exports = () => {
       }) : transaction.reward({ user, body })
     ))
 
+    .then(paymentResult => (
+      res.json(paymentResult)
+    ))
+
     .catch(err => (
       handle(err, res)
     ))
