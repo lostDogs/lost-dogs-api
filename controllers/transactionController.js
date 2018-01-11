@@ -82,10 +82,38 @@ module.exports = () => {
     ))
   );
 
+  const refund = ({ user, params: { id: _id } }, res) => (
+    Transaction.findOne({ _id, lost_id: user.id })
+
+    .then(transaction => (
+      !transaction ? Promise.reject({
+        statusCode: 404,
+        code: 'Not found.',
+      }) : !transaction.paymentId ? Promise.reject({
+        statusCode: 400,
+        code: 'Payment not registered.',
+      }) : !transaction.status === 'succes' ? Promise.reject({
+        statusCode: 409,
+        code: 'Reward already executed.',
+      }) : transaction.refund({ user })
+    ))
+
+    .then(() => (
+      res.status(204).json({
+        succes: true,
+      })
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
   return {
     retrieve,
     deleteItem,
     pay,
     reward,
+    refund,
   };
 };

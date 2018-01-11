@@ -6,7 +6,7 @@ const { handle } = require('../lib/errorHandler');
 const { signToken } = require('../lib/token');
 
 // outbound
-const { verifyAccount } = require('../outbound/email');
+const { verifyAccount, forgotPasswordEmail } = require('../outbound/email');
 
 module.exports = () => {
   const findByUsername = username => (
@@ -216,6 +216,42 @@ module.exports = () => {
     ))
   );
 
+  const forgotPassword = ({ params: { username } }, res) => (
+    User.findByUsername(username)
+
+    .then(user => (
+      user.generateNewPassword()
+
+      .then(password => (
+        forgotPasswordEmail({ user, password })
+      ))
+    ))
+
+    .then(() => (
+      res.json({
+        success: true,
+      })
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
+  const changePassword = ({ user, body: { new_password: newPassword, confirm_password: confirmPassword, old_password: oldPassword } }, res) => (
+    user.replacePassword({ newPassword, confirmPassword, oldPassword })
+
+    .then(() => (
+      res.json({
+        success: true,
+      })
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
   return {
     create,
     retrieve,
@@ -227,5 +263,7 @@ module.exports = () => {
     createPaymentOption,
     createBankAccount,
     getBankAccounts,
+    forgotPassword,
+    changePassword,
   };
 };

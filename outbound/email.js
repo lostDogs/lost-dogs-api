@@ -32,6 +32,35 @@ module.exports.verifyAccount = user => (
   ))
 );
 
+module.exports.rescuerInfo = ({ rescuer, transaction, qrUrl, owner }) => (
+  templates.load('foundEmailToOwner')
+
+  .then(({ from, subject, bodyCharset, content, appName }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject,
+        body: {
+          data: hugs({ owner, qrUrl, metadata: { appName }, transaction, reporter: rescuer }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [owner.email],
+      },
+    })
+  ))
+
+  .catch(err => (
+    Promise.reject({
+      statusCode: 500,
+      code: err.code,
+    })
+  ))
+);
+
 module.exports.foundEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
   Promise.all([templates.load('foundEmailToOwner'), templates.load('foundEmailToReporter')])
 
@@ -78,7 +107,7 @@ module.exports.foundEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => 
   ))
 );
 
-module.exports.lostEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
+module.exports.lostEmail = ({ lostUser, reporterUser, transaction }) => (
   Promise.all([templates.load('lostEmailToOwner'), templates.load('lostEmailToReporter')])
 
   .then(([owner, reporter]) => (
@@ -90,7 +119,7 @@ module.exports.lostEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
         content: {
           subject: owner.subject,
           body: {
-            data: hugs({ owner: lostUser, qrUrl, metadata: owner, transaction }, owner.content),
+            data: hugs({ owner: lostUser, metadata: owner, transaction }, owner.content),
             charset: owner.bodyCharset,
           },
         },
@@ -114,6 +143,35 @@ module.exports.lostEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
         },
       }),
     ])
+  ))
+
+  .catch(err => (
+    Promise.reject({
+      statusCode: 500,
+      code: err.code,
+    })
+  ))
+);
+
+module.exports.forgotPasswordEmail = ({ user, password }) => (
+  templates.load('forgotPassword')
+
+  .then(({ from, subject, bodyCharset, content }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject,
+        body: {
+          data: hugs({ user, password }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [user.email],
+      },
+    })
   ))
 
   .catch(err => (

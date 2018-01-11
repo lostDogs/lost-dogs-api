@@ -41,6 +41,35 @@ userSchema.methods.getOpenPlayInfo = function getOpenPlayInfo({ createIfMissing 
   });
 };
 
+userSchema.methods.generateNewPassword = function generateNewPassword({ usePassword } = {}) {
+  const newPassword = usePassword || Math.random().toString(36).substr(2, 6);
+
+  return encryptString(newPassword)
+
+  .then(password => (
+    this.update({ password })
+  ))
+
+  .then(() => (
+    Promise.resolve(newPassword)
+  ));
+};
+
+userSchema.methods.replacePassword = function replacePassword({ newPassword, confirmPassword, oldPassword }) {
+  return newPassword !== confirmPassword ? Promise.reject({
+    statusCode: 400,
+    code: 'Password mismatch',
+  }) : compareToEncryptedString(this.password, oldPassword)
+
+  .then(isMatch => {
+    console.log('wut', isMatch, oldPassword);
+    return !isMatch ? Promise.reject({
+      statusCode: 401,
+      code: 'Wrong user or password',
+    }) : this.generateNewPassword({ usePassword: newPassword })
+  });
+};
+
 userSchema.methods.createCustomer = function createCustomer({ customerInfo }) {
   return openPay.createCustomer(Object.assign(customerInfo, { _id: this.id }));
 };
@@ -174,12 +203,12 @@ userSchema.statics.validateToken = function validateToken({ username, token }) {
     .then(user => (!user ? Promise.reject({
       statusCode: 401,
       code: 'User not found',
-    }) : compareToEncryptedString(user.token, token)
-
-      .then(() => (
-        Promise.resolve(user)
-      ))
-    ));
+    }) : user.token === token ? Promise.resolve(user) :
+    Promise.reject({
+      statusCode: 401,
+      code: 'Wrong user or password',
+    })
+  ));
 };
 
 userSchema.statics.login = function login({ username, password }) {
@@ -191,7 +220,7 @@ userSchema.statics.login = function login({ username, password }) {
     }) : compareToEncryptedString(user.password, password)
 
       .then(isMatch => (
-        !isMatch ? Promise.resolve(user) : Promise.reject({
+        isMatch ? Promise.resolve(user) : Promise.reject({
           statusCode: 401,
           code: 'Wrong user or password',
         })

@@ -9,7 +9,7 @@ const User = require('./User');
 
 // libs
 const { validateRequiredFields } = require('../lib/common');
-const { foundEmail, lostEmail } = require('../outbound/email');
+const { foundEmail, lostEmail, rescuerInfo } = require('../outbound/email');
 
 // schema
 const transactionSchema = require('../schemas/transactionSchema');
@@ -32,7 +32,7 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
     }))
 
     .then(paymentResult => (
-      this.update({ paymentId: paymentResult.id, status: 'payment-processed', amount: paymentInfo.amount })
+      this.update({ paymentId: paymentResult.id, status: 'payment-processed', amount: paymentInfo.amount, qrIdentifier: uuid() })
 
       .then(() => (
         Promise.resolve(paymentResult)
@@ -45,7 +45,22 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
       }, paymentInfo))
 
       .then(() => (
-        Promise.resolve(paymentResult)
+        User.findById(this.found_id)
+
+        .then(rescuer => (
+          qrCode.toDataURL(JSON.stringify({
+            identifier: this.qrIdentifier,
+            transactionId: this.id,
+          }))
+
+          .then(qrUrl => (
+            rescuerInfo({ rescuer, owner: user, transaction: this, qrUrl })
+          ))
+
+          .then(() => (
+            Promise.resolve(paymentResult)
+          ))
+        ))
       ))
     ))
   ));
@@ -64,8 +79,16 @@ transactionSchema.methods.reward = function reward({ user, body }) {
   ))
 
   .then(paymentResult => (
-    Promise.resolve(paymentResult)
+    this.update({ status: 'success' })
+
+    .then(() => (
+      Promise.resolve(paymentResult)
+    ))
   ));
+};
+
+transactionSchema.methods.refund = function refund({ user }) {
+  return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lostdogs tid-${this.id}` });
 };
 
 transactionSchema.methods.update = function update(updateValues) {
@@ -128,9 +151,7 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
   }), transactionMappings.createRequiredFieldsList)
 
     .then(createBody => (
-      this.create(Object.assign(createBody, {
-        qrIdentifier: uuid(),
-      }))
+      this.create(createBody)
 
       .then(transaction => (
         Promise.all([
@@ -139,19 +160,11 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
         ])
 
         .then(([lostUser, reporterUser]) => (
-          qrCode.toDataURL(JSON.stringify({
-            identifier: transaction.qrIdentifier,
-            transactionId: transaction.id,
-          }))
-
-          .then(qrUrl => (
-            lostEmail({
-              lostUser,
-              qrUrl,
-              reporterUser,
-              transaction,
-            })
-          ))
+          lostEmail({
+            lostUser,
+            reporterUser,
+            transaction,
+          })
         ))
       ))
     ));

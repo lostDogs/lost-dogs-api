@@ -16,6 +16,11 @@ const notifications = {
       data: 'Bienvenido a Lostdog.',
     },
   },
+  forgotPassword: {
+    subject: {
+      data: 'Nueva contraseña',
+    },
+  },
 };
 
 module.exports.load = name => (

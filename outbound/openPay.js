@@ -144,4 +144,15 @@ module.exports = {
       }),
     }).then(validateAndFormatResponse)
   ),
+
+  refund: ({ customerId, paymentId, amount, description }) => (
+    fetch(`${getBaseRequest()}/customers/${customerId}/charges/${paymentId}/refund`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        amount,
+        description,
+      }),
+    }).then(validateAndFormatResponse)
+  ),
 };

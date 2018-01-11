@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 // dogs controller
-const { retrieve, pay, deleteItem, reward } = require('../controllers/transactionController')();
+const { retrieve, pay, deleteItem, reward, refund } = require('../controllers/transactionController')();
 const userAuthMiddleware = require('../lib/token').middleware({ reqUser: true });
 
 // CRUD
@@ -14,5 +14,6 @@ router.delete('/:id', userAuthMiddleware, deleteItem);
 
 router.post('/:id/pay', userAuthMiddleware, pay);
 router.post('/:id/reward/:identifier', userAuthMiddleware, reward);
+router.delete('/:id/refund', userAuthMiddleware, refund);
 
 module.exports = router;
