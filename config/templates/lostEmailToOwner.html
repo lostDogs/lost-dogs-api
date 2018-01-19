@@ -5,9 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Notificacion Lostdog</title>
 </head>
-
-<body>
-  Hola {{owner.name}} {{owner.lastName}} hemos encontrado a su perro completa los datos en la siguente <a href="https://www.{{metadata.appName}}.com/paymentForm?transcation={{transaction._id}}">liga</a> para ponerte encotnacto con quien lo encontro.
+<body style="margin:0;background-color:#F2F2F2; text-align: center;">
+  <img style="width: 300px;height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
+  <h2 style="border-bottom:10px solid #673A9A;border-radius: 5px; width: 100%"><i>¡Hola {{owner.name}} {{owner.lastName}}!</i></h2>
+  <h3>Hemos encontrado a tu perro!</h3>
+  <p><b>Completa</b> los datos en la siguente <a href="https://www.{{metadata.appName}}.com/#/review/payment/?transcation={{transaction._id}}">liga</a> para ponerte en contacto con el rescatista.</p>
+  <div style="border-top:10px solid #673A9A;border-radius: 5px;width: 100%"></div>
+  <div style="margin-top: 5px"> <a href="#">soporte@Lostdog.mx</a><b>|</b> <a href="#">Preguntas frecuentes</a></div>
 </body>
 
 </html>
