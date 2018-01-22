@@ -1,20 +1,22 @@
 <html lang="en">
-
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bienvenido a Lostdog</title>
+  <title>Notificacion de Lostdog</title>
 </head>
 
-<body>
-  Hola {{owner.name}} {{owner.lastName}}
-  <p>Datos del dueño del perro.</p>
-  <p>Nombre: {{reporter.name}} {{reporter.lastname}}</p>
-  <p>Telefono: {{reporter.contact_info.phone_number.area_code}} {{reporter.contact_info.phone_number.number}}</p>
-  <p>Email: {{reporter.email}}</p>
-  Una vez que hayan encontrado,accede a este link para saber si completo la <a href="https://wwww.{{metadata.appName}}.com/{{transaction.id}}">transacion</a>
-
+<body style="margin:0;background-color:#F2F2F2; text-align: center;">
+  <img style="width: 300px;height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
+  <h2 style="border-bottom:10px solid #673A9A;border-radius: 5px; width: 100%"><i>¡Hola {{owner.name}} {{owner.lastName}}!</i></h2>
+  <h3>Datos del dueño del perro.</h3>
+  <p><b>Nombre:</b> {{reporter.name}} {{reporter.lastname}}.</p>
+  <p><b>Telefono:</b> {{reporter.phone}}.</p>
+  <p><b>Email:</b> {{reporter.email}}.</p>
+  <p>Una vez que el rescatista te haya entregado el perro, permite que escanie el siguiente codigo:</p>
   <img src="{{qrUrl}}" width="400px" height="400px" />
+  <p>Si <b>no</b> es tu perro puedes pedir tu dinero de regreso <a href="https://wwww.{{metadata.appName}}.com/#/refund">aqui</a>.</p>
+  <div style="border-top:10px solid #673A9A;border-radius: 5px;width: 100%"></div>
+  <div style="margin-top: 5px"> <a href="#">soporte@Lostdog.mx</a><b>|</b> <a href="#">Preguntas frecuentes</a></div>
 </body>
 
 </html>
