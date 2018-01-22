@@ -23,6 +23,23 @@ module.exports = ({ credentials, bucketName }) => {
     })
   );
 
+  const putObject = ({ fileName, filePath, contentType: ContentType, contentEncoding: ContentEncoding }) => (
+    s3.putObject({
+      ACL: 'public-read',
+      Body: filePath,
+      Bucket: bucketName,
+      Key: fileName,
+      ContentType,
+      ContentEncoding,
+    }).promise()
+
+    .then(() => (
+      Promise.resolve({
+        url: `https://s3.amazonaws.com/wemeboo-public/${fileName}`,
+      })
+    ))
+  );
+
   const updateBucketCors = () => (
     new Promise((resolve, reject) => {
       s3.putBucketCors({
@@ -67,5 +84,6 @@ module.exports = ({ credentials, bucketName }) => {
     createBucket,
     getBucketLocation,
     signObject,
+    putObject,
   };
 };

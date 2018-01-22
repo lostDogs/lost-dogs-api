@@ -31,9 +31,10 @@ const sendEmailMap = {
 module.exports = ({ credentials }) => {
   const ses = new AWS.SES(credentials);
 
-  const sendEmail = ({ fromInfo, recipientInfo, content }) => (
-    ses.sendEmail(objectMapper({ fromInfo, recipientInfo, content }, sendEmailMap)).promise()
-  );
+  const sendEmail = ({ fromInfo, recipientInfo, content }) => {
+    console.log('sending email', JSON.stringify(recipientInfo));
+    return ses.sendEmail(objectMapper({ fromInfo, recipientInfo, content }, sendEmailMap)).promise();
+  };
 
   return {
     sendEmail,

@@ -66,7 +66,7 @@ userSchema.methods.replacePassword = function replacePassword({ newPassword, con
     return !isMatch ? Promise.reject({
       statusCode: 401,
       code: 'Wrong user or password',
-    }) : this.generateNewPassword({ usePassword: newPassword })
+    }) : this.generateNewPassword({ usePassword: newPassword });
   });
 };
 

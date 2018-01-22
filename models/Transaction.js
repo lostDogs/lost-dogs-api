@@ -1,7 +1,6 @@
 // dependencies
 const mongoose = require('mongoose');
 const objectMapper = require('object-mapper');
-const qrCode = require('qrcode');
 const uuid = require('uuid-v4');
 
 // models
@@ -10,6 +9,7 @@ const User = require('./User');
 // libs
 const { validateRequiredFields } = require('../lib/common');
 const { foundEmail, lostEmail, rescuerInfo } = require('../outbound/email');
+const { generateAndUpload } = require('../lib/qrCode');
 
 // schema
 const transactionSchema = require('../schemas/transactionSchema');
@@ -40,25 +40,28 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
     ))
 
     .then(paymentResult => (
-      saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
+      (saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
         customerId: customer.id,
-      }, paymentInfo))
+      }, paymentInfo)))
 
       .then(() => (
-        User.findById(this.found_id)
+        User.findByUsername(this.found_id)
 
         .then(rescuer => (
-          qrCode.toDataURL(JSON.stringify({
-            identifier: this.qrIdentifier,
-            transactionId: this.id,
-          }))
+          generateAndUpload({
+            fileName: `qrCodes/${this.id}`,
+            data: JSON.stringify({
+              identifier: this.qrIdentifier,
+              transactionId: this.id,
+            }),
+          })
 
-          .then(qrUrl => (
+          .then(({ url: qrUrl }) => (
             rescuerInfo({ rescuer, owner: user, transaction: this, qrUrl })
-          ))
 
-          .then(() => (
-            Promise.resolve(paymentResult)
+            .then(() => (
+              Promise.resolve(paymentResult)
+            ))
           ))
         ))
       ))
@@ -88,7 +91,11 @@ transactionSchema.methods.reward = function reward({ user, body }) {
 };
 
 transactionSchema.methods.refund = function refund({ user }) {
-  return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lostdogs tid-${this.id}` });
+  return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lostdogs tid-${this.id}` })
+
+  .then(() => (
+    this.update({ status: 'failed' })
+  ));
 };
 
 transactionSchema.methods.update = function update(updateValues) {
@@ -118,12 +125,15 @@ transactionSchema.statics.found = function found(body, { reporter_id, _id: id },
           ])
 
           .then(([lostUser, reporterUser]) => (
-            qrCode.toDataURL(JSON.stringify({
-              identifier: transaction.qrIdentifier,
-              transactionId: transaction.id,
-            }))
+            generateAndUpload({
+              fileName: `qrCodes/${this.id}`,
+              data: JSON.stringify({
+                identifier: this.qrIdentifier,
+                transactionId: this.id,
+              }),
+            })
 
-            .then(qrUrl => (
+            .then(({ url: qrUrl }) => (
               foundEmail({
                 lostUser,
                 qrUrl,
