@@ -9,11 +9,23 @@ const { handle } = require('../lib/errorHandler');
 module.exports = () => {
   const crudManager = CrudManager(Dog);
 
-  const create = (req, res) => (
-    crudManager.create(Object.assign(req.body, { username: req.jwtPayload.username }))
+  const create = ({ body, user }, res) => (
+    Dog.createMap(body)
+
+    .then(createBody => (
+      Dog.create(Object.assign(createBody, { username: user.username }))
+    ))
 
     .then(dog => (
-      res.status(201).json(dog)
+      body.paymentInfo ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({})
+
+      .then(paymentInfo => (
+        dog.getInfo()
+
+        .then(() => (
+          res.status(201).json(Object.assign(dog, { paymentInfo }))
+        ))
+      ))
     ))
 
     .catch(err => (

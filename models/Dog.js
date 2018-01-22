@@ -17,8 +17,40 @@ const s3 = require('../aws/').s3(process.env.S3_BUCKET);
 // static values
 const strictFields = 'male size_id color reporter_id pattern_id accessories_id lost reward'.split(' ');
 
+// outbound
+const openPay = require('../outbound/openPay');
+
 dogSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, dogMappings.infoMap);
+};
+
+dogSchema.methods.addPayment = function addPayment({ paymentInfo, user, saveCard }) {
+  return user.getOpenPlayInfo({ createIfMissing: true })
+
+  .then(customer => (
+    openPay.createCharge(Object.assign(paymentInfo, {
+      customerId: customer.id,
+      order_id: `tid-${this.id}`,
+    }))
+
+    .then(paymentResult => (
+      this.update({ paymentId: paymentResult.id, status: 'payment-processed', amount: paymentInfo.amount, qrIdentifier: uuid() })
+
+      .then(() => (
+        Promise.resolve(paymentResult)
+      ))
+    ))
+
+    .then(paymentResult => (
+      (saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
+        customerId: customer.id,
+      }, paymentInfo)))
+
+      .then(() => (
+        Promise.resolve(paymentResult)
+      ))
+    ))
+  ));
 };
 
 dogSchema.methods.updateImage = function updateImage(fileType) {

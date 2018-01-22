@@ -28,6 +28,8 @@ const dogSchema = new mongoose.Schema({
   lost: Boolean,
   reward: String,
 
+  upfrontPayment: Boolean,
+
   search: Array,
   reporter_id: String,
   images: [{
@@ -105,6 +107,7 @@ module.exports.dogMappings = {
     lost: 'lost',
     reward: 'reward',
     address: 'address',
+    upfrontPayment: 'upfrontPayment',
   },
 
   createRequiredFieldsList: 'name kind found_date reporter_id'.split(' '),

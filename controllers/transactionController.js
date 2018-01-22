@@ -83,7 +83,7 @@ module.exports = () => {
   );
 
   const refund = ({ user, params: { id: _id } }, res) => (
-    Transaction.findOne({ _id, lost_id: user.id })
+    Transaction.findOne({ _id, lost_id: user.username })
 
     .then(transaction => (
       !transaction ? Promise.reject({
