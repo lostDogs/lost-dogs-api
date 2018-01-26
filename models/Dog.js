@@ -156,8 +156,7 @@ dogSchema.statics.createMap = body => (
 
 dogSchema.statics.updateMap = (body) => {
   const updateBody = objectMapper(body, dogMappings.createMap);
-
-  return Promise.resolve(Object.assign(updateBody, {
+  return Promise.resolve(Object.assign(body, {
     found_date: updateBody.found_date ? moment(updateBody.found_date, 'YYYY-MM-DD HH:mm').toDate() : null,
   }));
 };
