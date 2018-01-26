@@ -35,7 +35,7 @@ module.exports = ({ credentials, bucketName }) => {
 
     .then(() => (
       Promise.resolve({
-        url: `https://s3.amazonaws.com/wemeboo-public/${fileName}`,
+        url: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
       })
     ))
   );
