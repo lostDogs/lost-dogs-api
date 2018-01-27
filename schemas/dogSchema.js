@@ -26,7 +26,7 @@ const dogSchema = new mongoose.Schema({
   pattern_id: String,
   accessories_id: [String],
   lost: Boolean,
-  reward: String,
+  reward: Number,
 
   upfrontPayment: Boolean,
 

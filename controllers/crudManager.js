@@ -59,6 +59,15 @@ module.exports = (model) => {
     validatePagination(query)
 
     .then(({ skip, limit }) => {
+      console.log('SKIP at crud >>> ', skip);
+      console.log('limit at crud >>>', limit);
+      console.log('query at crud >>>', query);
+      const sortObj = { created: -1 };
+      if (query.sortBy && (query.sortBy === 'found_date' || query.sortBy === 'Reward')) {
+        delete sortObj.created;
+        sortObj[query.sortBy] = query.sortOder === 'asc' ? 1 : -1;
+      }
+      console.log('query at crud >>>', sortObj);
       const searchRequest = (type) => {
         const dbQuery = model[type]({
           $and: (query.searchTerms || ' ').trim().split(' ').map(term => ({
@@ -68,9 +77,8 @@ module.exports = (model) => {
             },
           })).concat(model.extraFields(query)),
         });
-
         return (type !== 'count' ? dbQuery.limit(limit).skip(skip) : dbQuery)
-          .sort({ created: -1 })
+          .sort(sortObj)
           .exec();
       };
 
