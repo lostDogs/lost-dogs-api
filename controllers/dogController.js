@@ -45,15 +45,15 @@ module.exports = () => {
     Dog.updateMap(req.body)
 
     .then(updateBody => (
-      Dog.findById(req.params.id)
+      Dog.findOne({ _id: req.params.id, reporter_id: req.jwtPayload.username })
 
       .then(dog => (!dog ? Promise.reject({
-        statusCode: 404,
-        code: 'Not found.',
+        statusCode: 401,
+        code: 'Not authorized.',
       }) : Promise.resolve(dog)))
 
       .then(dog => (
-        Object.assign(dog, req.jwtPayload.username === dog.reporter_id ? updateBody : !dog.lost && updateBody.reward ? {reward: updateBody.reward} : {}).save()
+        Object.assign(dog, updateBody).save()
 
         .then(() => (
           res.json(dog.getInfo())

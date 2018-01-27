@@ -35,6 +35,7 @@ module.exports.transactionMappings = {
     found_id: 'found_id',
     dog_id: 'dog_id',
     status: 'status',
+    amount: 'amount',
     qrIdentifier: 'qrIdentifier',
   },
   updateMap: {
@@ -42,6 +43,7 @@ module.exports.transactionMappings = {
     found_id: 'found_id',
     dog_id: 'dog_id',
     status: 'status',
+    amount: 'amount'
   },
   infoMap: {
     id: 'id',
@@ -49,6 +51,7 @@ module.exports.transactionMappings = {
     found_id: 'found_id',
     dog_id: 'dog_id',
     status: 'status',
+    amount: 'amount',
     created_at: 'created_at',
   },
   createRequiredFieldsList: 'found_id lost_id dog_id'.split(' '),
