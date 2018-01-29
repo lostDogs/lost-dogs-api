@@ -114,6 +114,12 @@ dogSchema.statics.extraFields = (query) => {
     });
   }
 
+  if(query.matched) {
+    terms.push({
+      matched: query.matched === 'true'
+    });
+  }
+
   return terms.concat(query.location && query.maxDistance ? [{
     location: {
       $near: {

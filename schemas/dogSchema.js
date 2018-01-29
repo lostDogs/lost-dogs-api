@@ -26,6 +26,7 @@ const dogSchema = new mongoose.Schema({
   pattern_id: String,
   accessories_id: [String],
   lost: Boolean,
+  matched: Boolean,
   reward: Number,
 
   upfrontPayment: Boolean,
@@ -85,6 +86,7 @@ module.exports.dogMappings = {
     color: 'color',
     accessories_id: 'accessories_id',
     lost: 'lost',
+    matched: 'matched',
     reward: 'reward',
     address: 'address',
   },
@@ -105,6 +107,7 @@ module.exports.dogMappings = {
     color: 'color',
     accessories_id: 'accessories_id',
     lost: 'lost',
+    matched: 'matched',
     reward: 'reward',
     address: 'address',
     upfrontPayment: 'upfrontPayment',

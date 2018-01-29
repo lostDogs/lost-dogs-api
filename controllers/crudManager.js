@@ -59,9 +59,6 @@ module.exports = (model) => {
     validatePagination(query)
 
     .then(({ skip, limit }) => {
-      console.log('SKIP at crud >>> ', skip);
-      console.log('limit at crud >>>', limit);
-      console.log('query at crud >>>', query);
       const sortObj = { created: -1 };
       if (query.sortBy && (query.sortBy === 'found_date' || query.sortBy === 'Reward')) {
         delete sortObj.created;

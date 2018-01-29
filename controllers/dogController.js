@@ -10,7 +10,7 @@ module.exports = () => {
   const crudManager = CrudManager(Dog);
 
   const create = ({ body, user }, res) => (
-    Dog.createMap(body)
+    Dog.createMap(Object.assign(body, {matched: false}))
 
     .then(createBody => (
       Dog.create(Object.assign(createBody, { username: user.username }))
@@ -94,7 +94,10 @@ module.exports = () => {
     crudManager.retrieve(params.id)
 
     .then(dog => (
-      Transaction.found(Object.assign(body, {
+      dog.matched ? Promise.reject({
+      statusCode: 404,
+      code: 'already matched.',
+      }) : Transaction.found(Object.assign(body, {
         lost_id: user.username,
       }), dog, user)
     ))
@@ -115,7 +118,10 @@ module.exports = () => {
     crudManager.retrieve(req.params.id)
 
     .then(dog => (
-      Transaction.lost(Object.assign(req.body, {
+      dog.matched ? Promise.reject({
+      statusCode: 404,
+      code: 'already matched.',
+      }) : Transaction.lost(Object.assign(req.body, {
         found_id: req.user.username,
       }), dog)
     ))
