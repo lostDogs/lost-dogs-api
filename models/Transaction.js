@@ -5,7 +5,7 @@ const uuid = require('uuid-v4');
 
 // models
 const User = require('./User');
-const Dog = require('../models/Dog');
+const Dog = require('./Dog');
 
 // libs
 const { validateRequiredFields } = require('../lib/common');
