@@ -33,7 +33,7 @@ module.exports.verifyAccount = user => (
 );
 
 module.exports.rescuerInfo = ({ rescuer, transaction, qrUrl, owner }) => (
-  return templates.load('foundEmailToOwner')
+  templates.load('foundEmailToOwner')
 
   .then(({ from, subject, bodyCharset, content, appName }) => (
     ses.sendEmail({
@@ -62,7 +62,7 @@ module.exports.rescuerInfo = ({ rescuer, transaction, qrUrl, owner }) => (
 );
 
 module.exports.foundEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
-  return  templates.load('foundEmailToReporter')
+  templates.load('foundEmailToReporter')
 
   .then((reporter) => (
     ses.sendEmail({

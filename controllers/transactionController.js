@@ -1,6 +1,7 @@
 // models
 const CrudManager = require('./crudManager');
 const Transaction = require('../models/Transaction');
+const Dog = require('../models/Dog');
 
 // libs
 const { handle } = require('../lib/errorHandler');
@@ -27,13 +28,20 @@ module.exports = () => {
       !transaction ? Promise.reject({
         statusCode: 404,
         code: 'Not found.',
-      }) : transaction.pay({ user, body })
+      }) : Dog.findById(transaction.dog_id)
 
-      .then(paymentResult => (
-        res.json({
-          transaction: transaction.getInfo(),
-          paymentResult,
-        })
+      .then((dog) => (
+        body.paymentInfo.amount < dog.reward  ? Promise.reject({
+          statusCode: 400,
+          code: 'Amount is lower than reward.',
+        }) : transaction.pay({ user, body })
+
+        .then(paymentResult => (
+          res.json({
+            transaction: transaction.getInfo(),
+            paymentResult,
+          })
+        ))
       ))
     ))
 

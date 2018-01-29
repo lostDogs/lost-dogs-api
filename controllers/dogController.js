@@ -13,7 +13,10 @@ module.exports = () => {
     Dog.createMap(Object.assign(body, {matched: false}))
 
     .then(createBody => (
-      Dog.create(Object.assign(createBody, { username: user.username }))
+      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 65) ? Promise.reject({
+        statusCode: 400,
+        code: 'Amount does not match.',
+      }) : Dog.create(Object.assign(createBody, { username: user.username }))
     ))
 
     .then(dog => (
