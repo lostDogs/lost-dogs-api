@@ -6,7 +6,7 @@ const ses = require('../aws').ses;
 module.exports.verifyAccount = user => (
   templates.load('verifyAccount')
 
-  .then(({ from, subject, bodyCharset, content }) => (
+  .then(({ from, subject, bodyCharset, content, appName }) => (
     ses.sendEmail({
       fromInfo: {
         from,
@@ -14,7 +14,7 @@ module.exports.verifyAccount = user => (
       content: {
         subject,
         body: {
-          data: hugs(user, content),
+          data: hugs({metadata: { appName }, user}, content),
           charset: bodyCharset,
         },
       },
@@ -139,7 +139,7 @@ module.exports.lostEmail = ({ lostUser, reporterUser, transaction }) => (
 module.exports.forgotPasswordEmail = ({ user, password }) => (
   templates.load('forgotPassword')
 
-  .then(({ from, subject, bodyCharset, content }) => (
+  .then(({ from, subject, bodyCharset, content, appName }) => (
     ses.sendEmail({
       fromInfo: {
         from,
@@ -147,7 +147,7 @@ module.exports.forgotPasswordEmail = ({ user, password }) => (
       content: {
         subject,
         body: {
-          data: hugs({ user, password }, content),
+          data: hugs({ user, password, metadata: { appName } }, content),
           charset: bodyCharset,
         },
       },
