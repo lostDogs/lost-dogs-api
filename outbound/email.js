@@ -62,41 +62,24 @@ module.exports.rescuerInfo = ({ rescuer, transaction, qrUrl, owner }) => (
 );
 
 module.exports.foundEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => (
-  Promise.all([templates.load('foundEmailToOwner'), templates.load('foundEmailToReporter')])
+  templates.load('foundEmailToReporter')
 
-  .then(([owner, reporter]) => (
-    Promise.all([
-      ses.sendEmail({
-        fromInfo: {
-          from: owner.from,
+  .then((reporter) => (
+    ses.sendEmail({
+      fromInfo: {
+        from: reporter.from,
+      },
+      content: {
+        subject: reporter.subject,
+        body: {
+          data: hugs({ reporter: reporterUser, metadata: reporter, transaction }, reporter.content),
+          charset: reporter.bodyCharset,
         },
-        content: {
-          subject: owner.subject,
-          body: {
-            data: hugs({ owner: lostUser, qrUrl, metadata: owner, transaction, reporter: reporterUser }, owner.content),
-            charset: owner.bodyCharset,
-          },
-        },
-        recipientInfo: {
-          to: [lostUser.email],
-        },
-      }),
-      ses.sendEmail({
-        fromInfo: {
-          from: reporter.from,
-        },
-        content: {
-          subject: reporter.subject,
-          body: {
-            data: hugs({ reporter: reporterUser, metadata: reporter, transaction }, reporter.content),
-            charset: reporter.bodyCharset,
-          },
-        },
-        recipientInfo: {
-          to: [reporterUser.email],
-        },
-      }),
-    ])
+      },
+      recipientInfo: {
+        to: [reporterUser.email],
+      },
+    })
   ))
 
   .catch(err => (

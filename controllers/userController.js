@@ -220,7 +220,10 @@ module.exports = () => {
     User.findByUsername(username)
 
     .then(user => (
-      user.generateNewPassword()
+      !user ? Promise.reject({
+        statusCode: 404,
+        code: 'Not found.',
+      }) :user.generateNewPassword()
 
       .then(password => (
         forgotPasswordEmail({ user, password })

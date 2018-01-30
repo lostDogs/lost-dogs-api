@@ -5,6 +5,7 @@ const uuid = require('uuid-v4');
 
 // models
 const User = require('./User');
+const Dog = require('./Dog');
 
 // libs
 const { validateRequiredFields } = require('../lib/common');
@@ -82,10 +83,16 @@ transactionSchema.methods.reward = function reward({ user, body }) {
   ))
 
   .then(paymentResult => (
-    this.update({ status: 'success' })
-
-    .then(() => (
-      Promise.resolve(paymentResult)
+    Dog.findById(this.dog_id)
+    .then((dog) => (
+      Object.assign(dog, {matched: true}).save()
+      
+      .then(()=> (
+         this.update({ status: 'success'})
+         .then(() => (
+           Promise.resolve(paymentResult)
+         ))
+      ))
     ))
   ));
 };
