@@ -1,17 +1,22 @@
 <html lang="en">
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Notificacion Lostdog</title>
-</head>
-<body style="margin:0;background-color:#F2F2F2; text-align: center;">
-  <img style="width: 300px;height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
-  <h2 style="border-bottom:10px solid #673A9A;border-radius: 5px; width: 100%"><i>¡Hola {{owner.name}} {{owner.lastName}}!</i></h2>
-  <h3>Hemos encontrado a tu perro!</h3>
-  <p><b>Completa</b> los datos en la siguente <a href="https://{{metadata.appName}}.com/#/payment/review/?transcation={{transaction._id}}">liga</a> para ponerte en contacto con el rescatista.</p>
-  <div style="border-top:10px solid #673A9A;border-radius: 5px;width: 100%"></div>
-  <div style="margin-top: 5px"> <a href="#">soporte@Lostdog.mx</a><b>|</b> <a href="#">Preguntas frecuentes</a></div>
-</body>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notificacion Lostdog</title>
+    <link rel="icon" href="http://cdn.lostdog.mx/assets/img/favicon.ico">
+  </head>
+  <body style="margin:0;background-color:#F2F2F2; text-align: center;">
+    <table>
+      <tr>
+        <img style="width: 300px;height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
+        <h2 style="border-bottom:10px solid #673A9A;border-radius: 5px; width: 100%"><i>¡Hola {{owner.name}} {{owner.lastName}}!</i></h2>
+        <h3>¡Hemos encontrado a tu perro!</h3>
+        <p style="padding: 30px"><b>Completa</b> los datos en la siguente <a href="https://{{metadata.appName}}.com/#/payment/review/?transcation={{transaction._id}}">liga</a> para ponerte en contacto con el rescatista.</p>
+        <div style="border-top: 10px solid #673A9A;border-radius: 5px;width: 100%"></div>
+        <div style="margin-top: 5px;padding-bottom: 10px"> <a href="#">soporte@Lostdog.mx</a><b>|</b> <a href="#">Preguntas frecuentes</a></div>
+      </tr>
+    </table>
+  </body>
 
 </html>
