@@ -64,7 +64,6 @@ module.exports = (model) => {
         delete sortObj.created;
         sortObj[query.sortBy] = query.sortOder === 'asc' ? 1 : -1;
       }
-      console.log('query at crud >>>', sortObj);
       const searchRequest = (type) => {
         const dbQuery = model[type]({
           $and: (query.searchTerms || ' ').trim().split(' ').map(term => ({
