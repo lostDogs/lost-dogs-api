@@ -24,6 +24,9 @@ module.exports = () => {
 
       .then(paymentInfo => (
         res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
+      ), error => (
+         crudManager.deleteItem(dog.id)
+        .then(() => (handle(error, res)))
       ))
     ))
 
