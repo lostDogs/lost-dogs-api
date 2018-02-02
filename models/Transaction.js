@@ -41,7 +41,7 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
     ))
 
     .then(paymentResult => (
-      (saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
+      (!saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
         customerId: customer.id,
       }, paymentInfo)))
 

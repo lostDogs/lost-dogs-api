@@ -68,7 +68,7 @@ module.exports = {
   ),
 
   createCharge: ({ customerId, method = 'card', source_id: sourceId, amount, currency = 'MXN', description, order_id: orderId, device_session_id: deviceSessionId, capture = false }) => (
-    fetch(`${getBaseRequest()}/customers/${customerId}/charges`, {
+    amount < 10 ? Promise.resolve({amount: 0}) : fetch(`${getBaseRequest()}/customers/${customerId}/charges`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
