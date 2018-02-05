@@ -42,7 +42,7 @@ dogSchema.methods.addPayment = function addPayment({ paymentInfo, user, saveCard
     ))
 
     .then(paymentResult => (
-      (saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
+      (!saveCard ? Promise.resolve(paymentResult) : openPay.saveCard(Object.assign({
         customerId: customer.id,
       }, paymentInfo)))
 
