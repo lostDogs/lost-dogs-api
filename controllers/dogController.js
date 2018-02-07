@@ -108,10 +108,11 @@ module.exports = () => {
       }), dog, user)
     ))
 
-    .then(paymentResult => (
+    .then(({paymentResult, uploadEvidenceUrl}) => (
       res.status(201).json({
         success: true,
         paymentResult,
+        uploadEvidenceUrl
       })
     ))
 
