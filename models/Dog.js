@@ -141,7 +141,7 @@ dogSchema.statics.createMap = body => (
 
       .then(fileName => (
         s3.signObject({
-          fileName,
+          fileName: `dogs/${fileName}`,
 
           // mimetype
           fileType: image,

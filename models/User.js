@@ -174,7 +174,7 @@ userSchema.statics.createMap = body => (
 
     .then(fileName => (
       s3.signObject({
-        fileName,
+        fileName: `users/${fileName}`,
 
         // mimetype
         fileType: createBody.fileType,

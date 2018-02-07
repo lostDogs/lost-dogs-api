@@ -8,7 +8,7 @@ const User = require('./User');
 const Dog = require('./Dog');
 
 // AWS
-const s3 = require('../aws').s3(process.env.S3_BUCKET);
+const s3 = require('../aws').s3(process.env.s3_DISPOSABLE_BUCKET);
 
 // libs
 const { validateRequiredFields, encryptString } = require('../lib/common');
@@ -131,7 +131,7 @@ transactionSchema.statics.found = function found(body, { reporter_id, _id: id },
         
         .then(fileName => (
           s3.signObject({
-            fileName,
+            fileName: `evidence/${fileName}`,
 
             // mimetype
             fileType: body.fileType,
@@ -202,7 +202,7 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
         
         .then(fileName => (
           s3.signObject({
-            fileName,
+            fileName: `evidence/${fileName}`,
 
             // mimetype
             fileType: body.fileType,
@@ -233,7 +233,7 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
           })
 
           .then(() => (
-            Promise.resolve({uploadEvidenceUrl})
+            Promise.resolve(uploadEvidenceUrl)
           ))
         ))
       ))
