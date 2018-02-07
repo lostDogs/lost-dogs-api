@@ -132,9 +132,10 @@ module.exports = () => {
       }), dog)
     ))
 
-    .then(() => (
+    .then((uploadEvidenceUrl) => (
       res.status(201).json({
         success: true,
+        uploadEvidenceUrl
       })
     ))
 

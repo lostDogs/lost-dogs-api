@@ -21,6 +21,11 @@
         <h2 style="border-bottom: 10px solid #673A9A; border-radius: 5px; width: 100%;"><i>¡Hola {{reporter.name}}!</i></h2>
         <h3>¡Hemos encontrado el dueño del perro! </h3>
         <p>En poco tiempo se podra en contacto contigo. <br></p>
+        <h3>Esta es la evidencia que han agregado</h3>
+        <div style="  display: inline-block; width: 210px; border: 4px solid #673A9A; padding: 20px; border-radius: 10px; background-color: white;">
+          <div style="width: 200px; height: 200px; background-repeat: no-repeat; background-position: center; background-size: contain; background-image: url({{transaction.evidencePicture_url}}); display: {!!'{{transaction.evidencePicture_url}}' ? 'block' : 'none' };"></div>
+            <p>{{transaction.evidenceText}}</p>
+        </div>
         <h3 style="padding-top: 20px;">¿Cúales son los siguientes pasos?</h3>
         <p>-Deberán <b>acordar un punto de encuentro </b> Preferentemente</p>
         <p>en un parque o en un lugar público. Lo mejor es ir acompañado</p>

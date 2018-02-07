@@ -15,6 +15,9 @@ const transactionSchema = new mongoose.Schema({
   qrIdentifier: String,
   paymentId: String,
 
+    evidenceText: String,
+    evidencePicture_url: String,
+
   deleted: {
     type: Boolean,
     default: false,
@@ -36,6 +39,8 @@ module.exports.transactionMappings = {
     dog_id: 'dog_id',
     status: 'status',
     amount: 'amount',
+    evidenceText: 'evidenceText',
+    evidenceFileType: 'evidenceFileType',
     qrIdentifier: 'qrIdentifier',
   },
   updateMap: {
@@ -53,6 +58,8 @@ module.exports.transactionMappings = {
     status: 'status',
     amount: 'amount',
     created_at: 'created_at',
+    'evidenceText': 'evidenceText',
+    'evidencePicture_url': 'evidencePicture_url'
   },
   createRequiredFieldsList: 'found_id lost_id dog_id'.split(' '),
 };

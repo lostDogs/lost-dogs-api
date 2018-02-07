@@ -7,8 +7,11 @@ const uuid = require('uuid-v4');
 const User = require('./User');
 const Dog = require('./Dog');
 
+// AWS
+const s3 = require('../aws').s3(process.env.S3_BUCKET);
+
 // libs
-const { validateRequiredFields } = require('../lib/common');
+const { validateRequiredFields, encryptString } = require('../lib/common');
 const { foundEmail, lostEmail, rescuerInfo } = require('../outbound/email');
 const { generateAndUpload } = require('../lib/qrCode');
 
@@ -121,8 +124,31 @@ transactionSchema.statics.found = function found(body, { reporter_id, _id: id },
         dog_id: id,
         qrIdentifier: uuid(),
       }), transactionMappings.createMap))
-
+      
       .then(transaction => (
+        !body.fileType ? Promise.resolve({transaction}) : 
+        encryptString(`${transaction.id}-${uuid()}-${Date.now()}`)
+        
+        .then(fileName => (
+          s3.signObject({
+            fileName,
+
+            // mimetype
+            fileType: body.fileType,
+          })
+        ))
+        
+        .then(evidence => (
+          Promise.resolve({
+            uploadEvidenceUrl: evidence.signedRequest,
+            transaction: Object.assign(transaction, {
+              evidencePicture_url: evidence.url,
+            }),
+          })
+        ))
+      ))
+      
+      .then(({uploadEvidenceUrl, transaction}) => (
         transaction.pay({ user, body })
 
         .then(paymentResult => (
@@ -149,7 +175,7 @@ transactionSchema.statics.found = function found(body, { reporter_id, _id: id },
               })
 
               .then(() => (
-                Promise.resolve(paymentResult)
+                Promise.resolve({paymentResult, uploadEvidenceUrl})
               ))
             ))
           ))
@@ -171,6 +197,29 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
       this.create(createBody)
 
       .then(transaction => (
+        !body.fileType ? Promise.resolve({transaction}) : 
+        encryptString(`${transaction.id}-${uuid()}-${Date.now()}`)
+        
+        .then(fileName => (
+          s3.signObject({
+            fileName,
+
+            // mimetype
+            fileType: body.fileType,
+          })
+        ))
+        
+        .then(evidence => (
+          Promise.resolve({
+            uploadEvidenceUrl: evidence.signedRequest,
+            transaction: Object.assign(transaction, {
+              evidencePicture_url: evidence.url,
+            }),
+          })
+        ))           
+      ))
+
+      .then(({transaction, uploadEvidenceUrl}) => (
         Promise.all([
           User.findByUsername(transaction.lost_id),
           User.findByUsername(transaction.found_id),
@@ -182,6 +231,10 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
             reporterUser,
             transaction,
           })
+
+          .then(() => (
+            Promise.resolve({uploadEvidenceUrl})
+          ))
         ))
       ))
     ));

@@ -19,6 +19,11 @@
           <img style="width: 300px; height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
           <h2 style="border-bottom:10px solid #673A9A;border-radius: 5px; width: 100%"><i>¡Hola {{owner.name}}!</i></h2>
           <h3>¡Hemos encontrado a tu perro!</h3>
+          <h4>Esta es la evidencia que han agregado</h4>
+          <div style="  display: inline-block; width: 210px; border: 4px solid #673A9A; padding: 20px; border-radius: 10px; background-color: white;">
+            <div style="width: 200px; height: 200px; background-repeat: no-repeat; background-position: center; background-size: contain; background-image: url({{transaction.evidencePicture_url}}); display: {!!'{{transaction.evidencePicture_url}}' ? 'block' : 'none' };"></div>
+              <p>{{transaction.evidenceText}}</p>
+          </div>          
           <p style="padding: 30px;"><b>Completa</b> los datos en la siguente <a href="https://{{metadata.appName}}.com/#/payment/review/?transcation={{transaction._id}}">liga</a> para ponerte en contacto con el rescatista.</p>
           <div style="border-top: 10px solid #673A9A;border-radius: 5px;width: 100%;"></div>
           <div style="margin-top: 5px; padding-bottom: 10px"> <a href="#">soporte@Lostdog.mx </a><b> | </b> <a href="#"> Preguntas frecuentes</a></div>
