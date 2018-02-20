@@ -18,6 +18,7 @@ const {
   getBankAccounts,
   forgotPassword,
   changePassword,
+  capchaValid
 } = require('../controllers/userController')();
 const userAuthMiddleware = require('../lib/token').middleware({ reqUser: true });
 const annonAuthMiddleware = require('../lib/token').middleware({ reqUser: false });
@@ -34,6 +35,7 @@ router.delete('/:username', userAuthMiddleware, deleteItem);
 // Extras
 router.put('/:username/avatar', userAuthMiddleware, updateAvatar);
 router.put('/:username/changePassword', userAuthMiddleware, changePassword);
+router.post('/captcha', annonAuthMiddleware, capchaValid);
 
 // Payment options
 router.get('/:username/paymentOptions', userAuthMiddleware, getPaymentOptions);

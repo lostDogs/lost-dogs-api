@@ -7,6 +7,7 @@ const { signToken } = require('../lib/token');
 
 // outbound
 const { verifyAccount, forgotPasswordEmail } = require('../outbound/email');
+const { verifyCaptcha } = require('../outbound/captcha');
 
 module.exports = () => {
   const findByUsername = username => (
@@ -255,6 +256,16 @@ module.exports = () => {
     ))
   );
 
+  const capchaValid = ({body}, res) => (
+    verifyCaptcha(body.captchaVal).then(response => (
+      res.status(201).json(response)
+    ))
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  );
+
   return {
     create,
     retrieve,
@@ -268,5 +279,6 @@ module.exports = () => {
     getBankAccounts,
     forgotPassword,
     changePassword,
+    capchaValid
   };
 };
