@@ -1,16 +1,26 @@
-// Controller for email notifications
+// Model
+const User = require('../models/User');
 
 
 module.exports = () => {
 
 const bounces = (req, res) => {
-  console.log('bounces subscription headers >> ', req.headers);
-  console.log('bounces subscription body >> ', req.body);
-  console.log('<<<<<<< end bounce subscription body  >>>>>> ',);
   const message = JSON.parse(JSON.parse(req.body).Message);
-  console.log('bounces  message >> ', message);
-  console.log('bounces  emailAddress >> ', message.bounce.bouncedRecipients[0].emailAddress);
-  return res.status(200).json();
+  const emailAddress = message.bounce.bouncedRecipients[0].emailAddress.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
+  if (emailAddress && emailAddress.length) {
+    return User.updateOne({email: emailAddress[0]}, {$set: {email: undefined}})
+
+    .then(() => (
+      res.status(200).json()
+    ))
+    
+    .catch(() => (
+      Promise.reject({
+        statusCode: 500,
+        code: 'Internal server error.',
+      })      
+    ))
+  } 
   };
 
 const complaints = (req, res) => {
