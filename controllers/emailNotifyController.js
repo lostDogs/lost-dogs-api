@@ -8,7 +8,8 @@ const bounces = (req, res) => {
   const message = JSON.parse(JSON.parse(req.body).Message);
   const emailAddress = message.bounce.bouncedRecipients[0].emailAddress.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
   if (emailAddress && emailAddress.length) {
-    return User.updateOne({email: emailAddress[0]}, {$set: {email: undefined}})
+    console.log('finding and updating', emailAddress[0]);
+    return User.findOneAndUpdate({email: emailAddress[0]}, {email: undefined})
 
     .then(() => (
       res.status(200).json()
