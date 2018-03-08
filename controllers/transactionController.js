@@ -72,9 +72,7 @@ module.exports = () => {
       }) : /failed/g.test(transaction.status) ?Promise.reject({
         statusCode: 409,
         code: 'Refund already executed.',
-      }) :
-
-      transaction.reward({ user, body })
+      }) : transaction.reward({ user, body })
     ))
 
     .then(paymentResult => (
