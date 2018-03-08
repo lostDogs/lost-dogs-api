@@ -33,7 +33,7 @@ module.exports = ({ credentials }) => {
 
   const sendEmail = ({ fromInfo, recipientInfo, content }) => {
     console.log('sending email', JSON.stringify(recipientInfo));
-    return ses.sendEmail(objectMapper({ fromInfo, recipientInfo, content }, sendEmailMap)).promise();
+    return recipientInfo.to[0] ? ses.sendEmail(objectMapper({ fromInfo, recipientInfo, content }, sendEmailMap)).promise() : Promise.reject({statusCode: 402, code: 'hard-bounce or complain'})
   };
 
   return {

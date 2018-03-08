@@ -26,7 +26,7 @@ module.exports.verifyAccount = user => (
 
   .catch(err => (
     Promise.reject({
-      statusCode: 500,
+      statusCode: err.statusCode || 500 ,
       code: err.code,
     })
   ))
@@ -55,7 +55,7 @@ module.exports.rescuerInfo = ({ rescuer, transaction, qrUrl, owner }) => (
 
   .catch(err => (
     Promise.reject({
-      statusCode: 500,
+      statusCode: err.statusCode || 500 ,
       code: err.code,
     })
   ))
@@ -84,7 +84,7 @@ module.exports.foundEmail = ({ lostUser, qrUrl, reporterUser, transaction }) => 
 
   .catch(err => (
     Promise.reject({
-      statusCode: 500,
+      statusCode: err.statusCode || 500 ,
       code: err.code,
     })
   ))
@@ -130,7 +130,7 @@ module.exports.lostEmail = ({ lostUser, reporterUser, transaction }) => (
 
   .catch(err => (
     Promise.reject({
-      statusCode: 500,
+      statusCode: err.statusCode || 500 ,
       code: err.code,
     })
   ))
@@ -159,7 +159,7 @@ module.exports.forgotPasswordEmail = ({ user, password }) => (
 
   .catch(err => (
     Promise.reject({
-      statusCode: 500,
+      statusCode: err.statusCode || 500 ,
       code: err.code,
     })
   ))
