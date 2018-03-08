@@ -100,9 +100,12 @@ module.exports = () => {
       }) : !transaction.paymentId ? Promise.reject({
         statusCode: 400,
         code: 'Payment not registered.',
-      }) : !/success/g.test(transaction.status) ? Promise.reject({
+      }) : /success/g.test(transaction.status) ? Promise.reject({
         statusCode: 409,
         code: 'Reward already executed.',
+      }) : /failed/g.test(transaction.status) ?Promise.reject({
+        statusCode: 409,
+        code: 'Already refunded',
       }) : transaction.refund({ user })
     ))
 
