@@ -62,11 +62,19 @@ module.exports = () => {
         code: 'Payment not registered.',
       }) : transaction.qrIdentifier !== identifier ? Promise.reject({
         statusCode: 400,
-        code: 'Identifier does not match',
+        code: 'Identifier does not match.',
       }) : user.username !== transaction.found_id ? Promise.reject({
         statusCode: 400,
-        code: 'User does not match',
-      }) : transaction.reward({ user, body })
+        code: 'User does not match.',
+      }) : /success/g.test(transaction.status) ? Promise.reject({
+        statusCode: 409,
+        code: 'Reward already executed.',
+      }) : /failed/g.test(transaction.status) ?Promise.reject({
+        statusCode: 409,
+        code: 'Refund already executed.',
+      }) :
+
+      transaction.reward({ user, body })
     ))
 
     .then(paymentResult => (
@@ -105,7 +113,7 @@ module.exports = () => {
         code: 'Reward already executed.',
       }) : /failed/g.test(transaction.status) ?Promise.reject({
         statusCode: 409,
-        code: 'Already refunded',
+        code: 'Refund already executed.',
       }) : transaction.refund({ user })
     ))
 
