@@ -10,7 +10,7 @@ const countryCodes = require('../config/country/countryCodes');
 
 const getAddressFromUser = ({ street, city, ext_number: extNumber, int_number: intNumber, zip_code, neighborhood, country }) => ({
   line1: street,
-  line2: `#${extNumber} - #${intNumber}`,
+  line2: intNumber ? `#${extNumber} - #${intNumber}` : `#${extNumber}`,
   line3: neighborhood,
   state: city,
   postal_code: zip_code,
@@ -45,7 +45,7 @@ const validateAndFormatResponse = response => (
 );
 
 module.exports = {
-  createCustomer: ({ _id: external_id, name, lastName: last_name, email, phone_number: phone, contact_info: { address } }) => (
+  createCustomer: ({ _id: external_id, name, lastName: last_name, email, contact_info }) => (
     fetch(`${getBaseRequest()}/customers`, {
       method: 'POST',
       headers,
@@ -54,9 +54,9 @@ module.exports = {
         name,
         last_name,
         email,
-        phone,
+        phone_number: contact_info.phone_number.number,
         requires_account: false,
-        address: getAddressFromUser(address),
+        address: getAddressFromUser(contact_info.address),
       }),
     }).then(validateAndFormatResponse)
   ),
