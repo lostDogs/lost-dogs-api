@@ -55,6 +55,7 @@ module.exports = {
         last_name,
         email,
         phone,
+        requires_account: false,
         address: getAddressFromUser(address),
       }),
     }).then(validateAndFormatResponse)
