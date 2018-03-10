@@ -28,6 +28,10 @@ const dogSchema = new mongoose.Schema({
   lost: Boolean,
   matched: Boolean,
   reward: Number,
+  rewardPayed: {
+    type: Boolean,
+    default: false
+  },
 
   upfrontPayment: Boolean,
 
@@ -88,6 +92,10 @@ module.exports.dogMappings = {
     lost: 'lost',
     matched: 'matched',
     reward: 'reward',
+    rewardPayed: {
+      key: 'rewardPayed',
+      default: 'false'
+    },
     address: 'address',
   },
 
@@ -110,6 +118,7 @@ module.exports.dogMappings = {
     matched: 'matched',
     reward: 'reward',
     address: 'address',
+    rewardPayed: 'rewardPayed',
     upfrontPayment: 'upfrontPayment',
   },
 
