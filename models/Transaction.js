@@ -64,7 +64,7 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
             rescuerInfo({ rescuer, owner: user, transaction: this, qrUrl })
 
             .then(() => (
-              Promise.resolve(paymentResult)
+              Promise.resolve(Object.assign(paymentResult, rescuer, qrUrl))
             ))
           ))
         ))
