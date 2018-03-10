@@ -113,7 +113,12 @@ transactionSchema.methods.refund = function refund({ user }) {
   return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lostdogs tid-${this.id}` })
 
   .then(() => (
-    this.update({ status: 'failed' })
+    Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: false })
+
+    .then(() => (
+      this.update({ status: 'failed' })
+    ))
+    .catch(() => ( this.update({ status: 'failed' }) ))
   ));
 };
 
