@@ -104,7 +104,7 @@ module.exports = () => {
       statusCode: 404,
       code: 'already matched.',
       }) : Transaction.found(Object.assign(body, {
-        lost_id: user.username,
+        lost_id: user._id,
       }), dog, user)
     ))
 
@@ -129,7 +129,7 @@ module.exports = () => {
       statusCode: 404,
       code: 'already matched.',
       }) : Transaction.lost(Object.assign(req.body, {
-        found_id: req.user.username,
+        found_id: req.user._id,
       }), dog)
     ))
 

@@ -49,7 +49,7 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
       }, paymentInfo)))
 
       .then(() => (
-        User.findByUsername(this.found_id)
+        User.findById(this.found_id)
 
         .then(rescuer => (
           generateAndUpload({
@@ -111,7 +111,7 @@ transactionSchema.methods.reward = function reward({ user, body }) {
 
 transactionSchema.methods.refund = function refund({ user }) {
   return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lostdogs tid-${this.id}` })
-
+g
   .then(() => (
     Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: false })
 
@@ -167,8 +167,8 @@ transactionSchema.statics.found = function found(body, { reporter_id, _id: id },
 
         .then(paymentResult => (
           Promise.all([
-            User.findByUsername(transaction.lost_id),
-            User.findByUsername(transaction.found_id),
+            User.findById(transaction.lost_id),
+            User.findById(transaction.found_id),
           ])
 
           .then(([lostUser, reporterUser]) => (
@@ -235,8 +235,8 @@ transactionSchema.statics.lost = function lost(body, { reporter_id, _id: id }) {
 
       .then(({transaction, uploadEvidenceUrl}) => (
         Promise.all([
-          User.findByUsername(transaction.lost_id),
-          User.findByUsername(transaction.found_id),
+          User.findById(transaction.lost_id),
+          User.findById(transaction.found_id),
         ])
 
         .then(([lostUser, reporterUser]) => (

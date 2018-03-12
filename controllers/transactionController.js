@@ -63,7 +63,7 @@ module.exports = () => {
       }) : transaction.qrIdentifier !== identifier ? Promise.reject({
         statusCode: 400,
         code: 'Identifier does not match.',
-      }) : user.username !== transaction.found_id ? Promise.reject({
+      }) : !(new RegExp(user._id, 'g')).test(transaction.found_id) ? Promise.reject({
         statusCode: 400,
         code: 'User does not match.',
       }) : /success/g.test(transaction.status) ? Promise.reject({
@@ -97,7 +97,7 @@ module.exports = () => {
   );
 
   const refund = ({ user, params: { id: _id } }, res) => (
-    Transaction.findOne({ _id, lost_id: user.username })
+    Transaction.findOne({ _id, lost_id: user._id })
 
     .then(transaction => (
       !transaction ? Promise.reject({

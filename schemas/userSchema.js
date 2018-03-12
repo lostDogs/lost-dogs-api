@@ -124,6 +124,7 @@ module.exports.userMappings = {
     email: 'email',
     username: 'username',
     avatar_url: 'avatar_url',
+    id: 'id'
   },
   createRequiredFieldsList: 'name surname lastname contact_info.address.ext_number contact_info.address.neighborhood contact_info.address.zip_code contact_info.address.city contact_info.address.country contact_info.phone_number.number email username password confirm_password'.split(' '),
 };
