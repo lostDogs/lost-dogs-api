@@ -60,22 +60,23 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
             }),
           })
 
-          .then(({ url: qrUrl }) => (
-            Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: true })
+          .then(({ url: qrUrl }) => {
+            const shortRescuer = {avatar_url: rescuer.avatar_url, phone_number: rescuer.contact_info.phone_number, name: rescuer.name, surname: rescuer.surname, lastname: rescuer.lastname, email: rescuer.email};
+            return Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: true })
 
             .then(() => (
               rescuerInfo({ rescuer, owner: user, transaction: this, qrUrl })
 
               .then(() => (
-                Promise.resolve(Object.assign(paymentResult, rescuer, qrUrl))
+                Promise.resolve(Object.assign(paymentResult, {rescuer: shortRescuer}, {qrUrl}))
               ))
             )).catch(()=> (
               rescuerInfo({ rescuer, owner: user, transaction: this, qrUrl })
               .then(() => (
-                Promise.resolve(Object.assign(paymentResult, rescuer, qrUrl))
+                Promise.resolve(Object.assign(paymentResult, {rescuer: shortRescuer}, {qrUrl}))
               ))              
             ))
-          ))
+          })
         ))
       ))
     ))
