@@ -62,7 +62,7 @@ transactionSchema.methods.pay = function pay({ user, body: { saveCard, paymentIn
 
           .then(({ url: qrUrl }) => {
             const shortRescuer = {avatar_url: rescuer.avatar_url, phone_number: rescuer.contact_info.phone_number, name: rescuer.name, surname: rescuer.surname, lastname: rescuer.lastname, email: rescuer.email};
-            return Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: true })
+            return Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: paymentResult.amount >= 10 })
 
             .then(() => (
               rescuerInfo({ rescuer, owner: user, transaction: this, qrUrl })
@@ -111,8 +111,8 @@ transactionSchema.methods.reward = function reward({ user, body }) {
 };
 
 transactionSchema.methods.refund = function refund({ user }) {
-  return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lostdogs tid-${this.id}` })
-g
+  return openPay.refund({ customerId: user.openPayId, paymentId: this.paymentId, amount: this.amount, description: `Devolucion lost dog tid-${this.id}` })
+  
   .then(() => (
     Dog.findOneAndUpdate({ _id: this.dog_id }, { rewardPayed: false })
 
