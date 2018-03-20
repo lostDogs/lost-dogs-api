@@ -20,7 +20,7 @@ module.exports = () => {
     ))
 
     .then(dog => (
-      (body.paymentInfo ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
+      (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
       .then(paymentInfo => (
         res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
