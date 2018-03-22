@@ -15,7 +15,7 @@ const { generateArrayFromObject, validateRequiredFields, encryptString } = requi
 const s3 = require('../aws/').s3(process.env.S3_BUCKET);
 
 // static values
-const strictFields = 'male size_id color reporter_id pattern_id accessories_id lost reward'.split(' ');
+const strictFields = 'male size_id reporter_id pattern_id accessories_id lost reward'.split(' ');
 
 // outbound
 const openPay = require('../outbound/openPay');
@@ -101,7 +101,13 @@ dogSchema.statics.extraFields = (query) => {
 
   if (query.kind) {
     terms.push({
-      kind: { $in: query.kind.split(',') },
+      kind: { $in: query.kind.split(',');.map((term, index) => (new RegExp(`^${term},|,${term},|,${term}$`)))},
+    });
+  }
+
+  if (query.color) {
+    terms.push({
+      color: { $in: query.color.split(',').map(term => (new RegExp(term)))},
     });
   }
 
