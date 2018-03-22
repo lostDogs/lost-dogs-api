@@ -101,7 +101,7 @@ dogSchema.statics.extraFields = (query) => {
 
   if (query.kind) {
     terms.push({
-      kind: { $in: query.kind.split(',').map((term, index) => (new RegExp(`^${term},|,${term},|,${term}$`)))},
+      kind: { $in: query.kind.split(',').map((term, index) => (new RegExp(`^${term},|,${term},|^${term}$|,${term}$`)))},
     });
   }
 
