@@ -60,9 +60,9 @@ module.exports = (model) => {
 
     .then(({ skip, limit }) => {
       const sortObj = { created: -1 };
-      if (query.sortBy && (query.sortBy === 'found_date' || query.sortBy === 'Reward')) {
+      if (query.sortBy && (/ound_date/g.test(query.sortBy) || /eward/g.test(query.sortBy))) {
         delete sortObj.created;
-        sortObj[query.sortBy] = query.sortOder === 'asc' ? 1 : -1;
+        sortObj[query.sortBy] = /asc/g.test(query.sortOder) ? 1 : -1;
       }
       const searchRequest = (type) => {
         const dbQuery = model[type]({
