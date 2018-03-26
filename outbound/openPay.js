@@ -9,12 +9,12 @@ const headers = {
 const countryCodes = require('../config/country/countryCodes');
 
 const getAddressFromUser = ({ street, state, city, ext_number: extNumber, int_number: intNumber, zip_code, neighborhood, country }) => ({
-  line1: street,
-  line2: intNumber ? `#${extNumber} - #${intNumber}` : `#${extNumber}`,
-  line3: neighborhood,
-  state: state || 'NA',
-  postal_code: zip_code,
-  city,
+  line1: street || 'Sin definir',
+  line2: (intNumber ? `#${extNumber} - #${intNumber}` : `#${extNumber}`) || 'Sin definir',
+  line3: neighborhood || 'Sin definir',
+  state: state || 'Sin definir',
+  postal_code: zip_code || 'Sin definir',
+  city: city || 'Sin definir',
   country_code: countryCodes[country.toLowerCase()],
 });
 
