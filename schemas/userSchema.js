@@ -89,6 +89,7 @@ module.exports.userMappings = {
     password: 'password',
     confirm_password: 'confirm_password',
     avatarFileType: 'fileType',
+    avatar_url: 'avatar_url'
   },
   updateMap: {
     name: 'name',

@@ -170,7 +170,7 @@ userSchema.statics.createMap = body => (
   // get sign object from s3
   .then(createBody => (
     // encript filename
-    encryptString(`${createBody.username}-${uuid()}-${Date.now()}`)
+    createBody.avatar_url ?Promise.resolve({createBody}) : encryptString(`${createBody.username}-${uuid()}-${Date.now()}`)
 
     .then(fileName => (
       s3.signObject({
