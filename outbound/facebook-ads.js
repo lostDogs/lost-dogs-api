@@ -36,9 +36,8 @@ const createTarget = ({radius, latLng}) => ({
       }],
       [TargetingGeoLocation.Fields.location_types]: ['recent', 'home']
     },
-    [Targeting.Fields.age_min]: 13,
-    [Targeting.Fields.age_min]: 60,
-    [Targeting.Fields.interests]: adinterests,
+    [Targeting.Fields.age_min]: '13',
+    [Targeting.Fields.age_max]: '60',
     [Targeting.Fields.publisher_platforms]: ['facebook'],
     [Targeting.Fields.facebook_positions]:  ['feed', 'right_hand_column']
   });
@@ -61,19 +60,18 @@ module.exports = {
       ))
   ),
 
-  createAdSet: ({adSetName, DailyBudget, endTime, radius, latLng}) => (
-    account.createAdSet(
-      [AdSet.Fields.id],
+  createAdSet: ({name, dailyBudget, endTime, radius, latLng}) => (
+    api.call('POST', [`act_${process.env.ADUSER_ID}`, 'adsets'],
       {
-        [AdSet.Fields.name]: adSetName,
-        [AdSet.Fields.optimization_goal]: AdSet.OptimizationGoal.link_clicks,
-        [AdSet.Fields.daily_budget]: DailyBudget,
+        [AdSet.Fields.name]: name,
+        [AdSet.Fields.optimization_goal]: AdSet.OptimizationGoal.reach,
+        [AdSet.Fields.daily_budget]: dailyBudget * 0.9,
         [AdSet.Fields.is_autobid]: true,
         [AdSet.Fields.campaign_id]: process.env.CAMPAIGN_ID,
         [AdSet.Fields.targeting]: createTarget({radius, latLng}),
-         [AdSet.Fields.start_time]: moment().add(30, 'mins').format('YYYY-MM-DD HH:mm:ss Z'),
-         [AdSet.Fields.end_time]: moment().add(1, 'day').format('YYYY-MM-DD HH:mm:ss Z'),
-         [AdSet.Fields.billing_event]: AdSet.BillingEvent.impressions
+        [AdSet.Fields.start_time]: moment().add(30, 'mins').format('YYYY-MM-DD HH:mm:ss Z'),
+        [AdSet.Fields.end_time]: moment().add(1, 'day').format('YYYY-MM-DD HH:mm:ss Z'),
+        [AdSet.Fields.billing_event]: AdSet.BillingEvent.impressions
       }
     )
     .then((result) => (
@@ -94,29 +92,33 @@ module.exports = {
     ))
   ),
 
-  createAdCreative: ({AdCreativeName, body, image_url, link, title, description})=> (
-    account.createAdCreative(
-      [AdCreative.Fields.id],
-      {
-       [AdCreative.Fields.name]: AdCreativeName,
-       [AdCreative.Fields.object_type]: AdCreative.ObjectType.photo,
-        [AdCreative.Fields.object_story_spec]: {
-          [AdCreativeObjectStorySpec.Fields.link_data]: {
-            [AdCreativeLinkData.Fields.link]: link,
-            [AdCreativeLinkData.Fields.name]: title,
-            [AdCreativeLinkData.Fields.message]: body,
-            [AdCreativeLinkData.Fields.caption]: 'www.lostdog.mx',
-            [AdCreativeLinkData.Fields.description]: description,
-            [AdCreativeLinkData.Fields.picture]: image_url,
-            [AdCreativeLinkData.Fields.call_to_action]: {
-              [AdCreativeLinkDataCallToAction.Fields.type]: AdCreativeLinkDataCallToAction.Type.learn_more,
-              [AdCreativeLinkDataCallToAction.Fields.value]: { [AdCreativeLinkDataCallToActionValue.Fields.link]: link }
-            }
-          },
-            [AdCreativeObjectStorySpec.Fields.page_id]: pageId
+  createAdCreative: ({name, body, image_hash, link, title, description})=> (
+    api.call('POST', [`act_${process.env.ADUSER_ID}`, 'adcreatives'], {
+     [AdCreative.Fields.name]: name,
+     [AdCreative.Fields.object_type]: AdCreative.ObjectType.photo,
+      [AdCreative.Fields.object_story_spec]: {
+        [AdCreativeObjectStorySpec.Fields.link_data]: {
+          [AdCreativeLinkData.Fields.link]: link,
+          [AdCreativeLinkData.Fields.name]: title,
+          [AdCreativeLinkData.Fields.message]: body,
+          [AdCreativeLinkData.Fields.caption]: 'www.lostdog.mx',
+          [AdCreativeLinkData.Fields.description]: description,
+          [AdCreativeLinkData.Fields.image_hash]: image_hash,
+          [AdCreativeLinkData.Fields.call_to_action]: {
+            [AdCreativeLinkDataCallToAction.Fields.type]: AdCreativeLinkDataCallToAction.Type.learn_more,
+            [AdCreativeLinkDataCallToAction.Fields.value]: { [AdCreativeLinkDataCallToActionValue.Fields.link]: link }
           }
+        },
+          [AdCreativeObjectStorySpec.Fields.page_id]: pageId
       }
-    )
+    })
+    .then((result) => (
+      Promise.resolve(result)
+    ))
+    .catch((error) => {
+      console.log('error', error);
+      return Promise.reject(error)
+    })
   ),
 
   bindSetCreative: ({adName, adSetId, adCreativeId}) => {
@@ -134,14 +136,13 @@ module.exports = {
     ))
   },
 
-  getReachEstimate: ({daily_budget, currency, radius, latLng}) => {
+  getReachEstimate: ({adSetId, radius, latLng}) => {
     const params = {
-      currency,
-      daily_budget,
-      optimize_for: 'OFFSITE_CONVERSIONS',
+      optimization_goal: 'REACH',
       targeting_spec: JSON.stringify(createTarget({radius, latLng}))
     }
-    return api.call('GET', [`act_${process.env.ADUSER_ID}`, 'reachestimate'], params)
+    console.log('adSetId', adSetId);
+    return api.call('GET', [adSetId, 'delivery_estimate'], params)
     .then((result) => (
       Promise.resolve(result)
     ))
@@ -151,8 +152,9 @@ module.exports = {
     })
   },
 
-  setImage: ({bytes}) => {
-    return api.call('POST', [`act_${process.env.ADUSER_ID}`, 'adimages'], {bytes: bytes.replace(/^(.+?),/, ''), encoding: bytes.match(/^(.+?),/, '') && bytes.match(/^(.+?),/, '')[0]})
+  setImage: (img) => (
+    api.call('POST', [`act_${process.env.ADUSER_ID}`, 'adimages'], {bytes: img.replace(/^(.+?),/, ''), encoding: img.match(/^(.+?),/, '') && img.match(/^(.+?),/, '')[0]})
+
     .then((result) => (
       Promise.resolve(result)
     ))
@@ -160,5 +162,30 @@ module.exports = {
       console.log('error', error);
       return Promise.reject(error)
     })    
-  }
+  ),
+
+  updateAdSet: ({adSetId, dailyBudget, endTime}) => {
+    return api.call('POST', [adSetId], {
+      [AdSet.Fields.daily_budget]: Math.round(dailyBudget * 0.9),
+      [AdSet.Fields.end_time]: moment().add(endTime, 'day').format('YYYY-MM-DD HH:mm:ss Z'),
+    })
+    .then((result) => (
+      Promise.resolve(result)
+    ))
+    .catch((error) => {
+      console.log('error', error);
+      return Promise.reject(error)
+    })
+  },
+
+  deleteAdSet: ({adSetId}) => (
+    api.call('DELETE', [adSetId], {})
+    .then((result) => (
+      Promise.resolve(result)
+    ))
+    .catch((error) => {
+      console.log('error', error);
+      return Promise.reject(error)
+    })
+  )  
 };

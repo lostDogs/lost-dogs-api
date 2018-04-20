@@ -19,6 +19,7 @@ const strictFields = 'male size_id reporter_id pattern_id accessories_id lost re
 
 // outbound
 const openPay = require('../outbound/openPay');
+const fbAds = require('../outbound/facebook-ads');
 
 dogSchema.methods.getInfo = function getInfo() {
   return objectMapper(this, dogMappings.infoMap);
@@ -52,6 +53,21 @@ dogSchema.methods.addPayment = function addPayment({ paymentInfo, user, saveCard
     ))
   ));
 };
+
+dogSchema.methods.createFbAd = function createFbAd({ ad, dogId}) {
+  return Promise.all([
+    fbAds.updateAdSet(ad.set),
+    fbAds.setImage(ad.img)
+  ])
+  .then(([setResp, imgResp]) => (
+    fbAds.createAdCreative(Object.assign(ad.creative, {image_hash: imgResp.images.bytes.hash}))
+
+    .then(creative => (
+      Promise.resolve({img: {url: imgResp.images.bytes.url, hash: imgResp.images.bytes.hash}, creativeid: creative.id})
+    ))
+  ))
+};
+
 
 dogSchema.methods.updateImage = function updateImage(fileType) {
   // encript filename

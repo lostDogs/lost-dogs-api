@@ -13,18 +13,23 @@ module.exports = () => {
     Dog.createMap(Object.assign(body, {matched: false}))
 
     .then(createBody => (
-      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 65) ? Promise.reject({
+      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 65 + (body.ad.set.dailyBudget / 100 *  body.ad.set.endTime)) ? Promise.reject({
         statusCode: 400,
         code: 'Amount does not match.',
-      }) : Dog.create(Object.assign(createBody, { username: user.username }))
+      }) : Dog.create(Object.assign(createBody, { username: user.username, facebookAds: !!body.ad }))
     ))
 
     .then(dog => (
       (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
-      .then(paymentInfo => (
-        res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
-      ), error => (
+      .then(paymentInfo => {
+        return (/admin/g.test(user.role)) ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(body)
+
+        .then(fbAd => (
+          return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
+        ))
+
+      }, error => (
          crudManager.deleteItem(dog.id)
         .then(() => (handle(error, res)))
       ))
