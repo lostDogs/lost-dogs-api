@@ -5,7 +5,7 @@ const Transaction = require('../models/Transaction');
 
 // libs
 const { handle } = require('../lib/errorHandler');
-
+const { createFbAdEmail } = require('../outbound/email');
 module.exports = () => {
   const crudManager = CrudManager(Dog);
 
@@ -22,9 +22,10 @@ module.exports = () => {
     .then(dog => (
       (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
-      .then(paymentInfo => (
-        res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
-      ), error => (
+      .then(paymentInfo => {
+        createFbAdEmail({dog: dog.getInfo()});
+        return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
+      }, error => (
          crudManager.deleteItem(dog.id)
         .then(() => (handle(error, res)))
       ))
