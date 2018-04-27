@@ -69,8 +69,8 @@ module.exports = {
         [AdSet.Fields.is_autobid]: true,
         [AdSet.Fields.campaign_id]: process.env.CAMPAIGN_ID,
         [AdSet.Fields.targeting]: createTarget({radius, latLng}),
-        [AdSet.Fields.start_time]: moment().add(30, 'mins').format('YYYY-MM-DD HH:mm:ss Z'),
-        [AdSet.Fields.end_time]: moment().add(1, 'day').format('YYYY-MM-DD HH:mm:ss Z'),
+        [AdSet.Fields.start_time]: moment().add(1, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
+        [AdSet.Fields.end_time]: moment().add(25, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
         [AdSet.Fields.billing_event]: AdSet.BillingEvent.impressions
       }
     )
@@ -92,13 +92,13 @@ module.exports = {
     ))
   ),
 
-  createAdCreative: ({name, body, image_hash, link, title, description})=> (
+  createAdCreative: ({name, body, image_hash, title, description, dogId, adSetId})=> (
     api.call('POST', [`act_${process.env.ADUSER_ID}`, 'adcreatives'], {
-     [AdCreative.Fields.name]: name,
+     [AdCreative.Fields.name]: `D:${dogId}-${adSetId}`,
      [AdCreative.Fields.object_type]: AdCreative.ObjectType.photo,
       [AdCreative.Fields.object_story_spec]: {
         [AdCreativeObjectStorySpec.Fields.link_data]: {
-          [AdCreativeLinkData.Fields.link]: link,
+          [AdCreativeLinkData.Fields.link]: process.env.APP_NAME + process.env.DOG_URL + dogId + '',
           [AdCreativeLinkData.Fields.name]: title,
           [AdCreativeLinkData.Fields.message]: body,
           [AdCreativeLinkData.Fields.caption]: 'www.lostdog.mx',
@@ -106,7 +106,7 @@ module.exports = {
           [AdCreativeLinkData.Fields.image_hash]: image_hash,
           [AdCreativeLinkData.Fields.call_to_action]: {
             [AdCreativeLinkDataCallToAction.Fields.type]: AdCreativeLinkDataCallToAction.Type.learn_more,
-            [AdCreativeLinkDataCallToAction.Fields.value]: { [AdCreativeLinkDataCallToActionValue.Fields.link]: link }
+            [AdCreativeLinkDataCallToAction.Fields.value]: { [AdCreativeLinkDataCallToActionValue.Fields.link]: process.env.APP_NAME + process.env.DOG_URL + dogId + '' }
           }
         },
           [AdCreativeObjectStorySpec.Fields.page_id]: pageId
@@ -167,7 +167,7 @@ module.exports = {
   updateAdSet: ({adSetId, dailyBudget, endTime}) => {
     return api.call('POST', [adSetId], {
       [AdSet.Fields.daily_budget]: Math.round(dailyBudget * 0.9),
-      [AdSet.Fields.end_time]: moment().add(endTime, 'day').format('YYYY-MM-DD HH:mm:ss Z'),
+      [AdSet.Fields.end_time]: moment().add(endTime * 24 + 1, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
     })
     .then((result) => (
       Promise.resolve(result)
@@ -178,7 +178,7 @@ module.exports = {
     })
   },
 
-  deleteAdSet: ({adSetId}) => (
+  deleteAdSet: (adSetId) => (
     api.call('DELETE', [adSetId], {})
     .then((result) => (
       Promise.resolve(result)

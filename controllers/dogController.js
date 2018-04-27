@@ -22,14 +22,14 @@ module.exports = () => {
     .then(dog => (
       (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
-      .then(paymentInfo => {
-        return (/admin/g.test(user.role)) ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(body)
+      .then(paymentInfo => (
+        (/admin/g.test(user.role)) && !body.ad ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(Object.assign(body, {dogId: dog.id, userEmail: user.email}))
 
         .then(fbAd => (
-          return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
+          res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
         ))
 
-      }, error => (
+      ), error => (
          crudManager.deleteItem(dog.id)
         .then(() => (handle(error, res)))
       ))
