@@ -5,7 +5,7 @@ const Transaction = require('../models/Transaction');
 
 // libs
 const { handle } = require('../lib/errorHandler');
-
+const { createFbAdEmail } = require('../outbound/email');
 module.exports = () => {
   const crudManager = CrudManager(Dog);
 
@@ -28,6 +28,12 @@ module.exports = () => {
         .then(fbAd => (
           res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
         ))
+
+        .catch(error => {
+          console.log('error creating fbad >>', error);
+          createFbAdEmail({dog: dog.getInfo()});
+          return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd: error}));
+        })
 
       ), error => (
          crudManager.deleteItem(dog.id)

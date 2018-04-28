@@ -8,12 +8,12 @@ const notifications = {
     appName: process.env.APP_NAME,
     from: process.env.EMAIL_NO_REPLY,
     subject: {
-      data: 'Notifiacion Lostdog.',
+      data: 'Notifiacion Lost Dog.',
     },
   },
   verifyAccount: {
     subject: {
-      data: 'Bienvenido a Lostdog.',
+      data: 'Bienvenido a Lost Dog.',
     },
   },
   forgotPassword: {
