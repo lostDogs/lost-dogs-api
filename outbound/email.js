@@ -164,3 +164,37 @@ module.exports.forgotPasswordEmail = ({ user, password }) => (
     })
   ))
 );
+
+module.exports.createFbAdEmail = ({ dog }) => {
+  const mapsUrl = `https://www.google.com/maps/?q=${dog.location.coordinates[1]},${dog.location.coordinates[0]}`;
+  const imgUrl = dog.images[0].image_url + '';
+  const gender = dog.male + '';
+
+  return templates.load('createFbAd')
+
+    .then(({ from, subject, bodyCharset, content, appName }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject,
+        body: {
+          data: hugs({ dog, mapsUrl, imgUrl, gender, metadata: { appName } }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [process.env.EMAIL_MONITOR],
+      },
+    })
+  ))
+
+  .catch(err => {
+    console.error('error sending template', err);
+    return Promise.reject({
+      statusCode: err.statusCode || 500 ,
+      code: err.code,
+    })
+  })
+};
