@@ -23,7 +23,7 @@ module.exports = () => {
       (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
       .then(paymentInfo => (
-        (/admin/g.test(user.role)) && !body.ad ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(Object.assign(body, {dogId: dog.id, userEmail: user.email}))
+        (/admin/g.test(user.role)) || !body.ad || !body.paymentInfo ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(Object.assign(body, {dogId: dog.id, userEmail: user.email}))
 
         .then(fbAd => (
           res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
@@ -31,7 +31,7 @@ module.exports = () => {
 
         .catch(error => {
           console.log('error creating fbad >>', error);
-          createFbAdEmail({dog: dog.getInfo()});
+          body.paymentInfo && createFbAdEmail({dog: dog.getInfo()});
           return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd: error}));
         })
 
