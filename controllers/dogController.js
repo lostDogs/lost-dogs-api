@@ -23,7 +23,7 @@ module.exports = () => {
       (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
       .then(paymentInfo => {
-        createFbAdEmail({dog: dog.getInfo()});
+        body.paymentInfo && createFbAdEmail({dog: dog.getInfo()});
         return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
       }, error => (
          crudManager.deleteItem(dog.id)
