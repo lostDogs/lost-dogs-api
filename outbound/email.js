@@ -165,7 +165,7 @@ module.exports.forgotPasswordEmail = ({ user, password }) => (
   ))
 );
 
-module.exports.createFbAdEmail = ({ dog }) => {
+module.exports.createFbAdEmail = ({ dog, error, paymentInfo }) => {
   const mapsUrl = `https://www.google.com/maps/?q=${dog.location.coordinates[1]},${dog.location.coordinates[0]}`;
   const imgUrl = dog.images[0].image_url + '';
   const gender = dog.male + '';
@@ -180,7 +180,7 @@ module.exports.createFbAdEmail = ({ dog }) => {
       content: {
         subject,
         body: {
-          data: hugs({ dog, mapsUrl, imgUrl, gender, metadata: { appName } }, content),
+          data: hugs({ dog, mapsUrl, imgUrl, gender, error, paymentInfo, metadata: { appName } }, content),
           charset: bodyCharset,
         },
       },

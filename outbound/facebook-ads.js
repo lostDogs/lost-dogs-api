@@ -42,6 +42,17 @@ const createTarget = ({radius, latLng}) => ({
     [Targeting.Fields.facebook_positions]:  ['feed', 'right_hand_column']
   });
 
+const errorHandler = (error, at) => {
+  console.log('error in facebook marketing api', error);
+  return Promise.reject({
+    statusCode: error.status || 500,
+    code: error.message ||'at facebook marketing api' ,
+    at: at,
+    data: error.response && error.response.error ? 
+      { url:  error.url , data: error.data , method: error.method, error_user_msg: error.response.error.error_user_msg } : error, 
+  })
+} 
+
 module.exports = {
   createCampaign:  ({campaignName, status}) => (
     account.createCampaign(
@@ -56,7 +67,7 @@ module.exports = {
         Promise.resolve(result)
       ))
       .catch((error) => (
-        Promise.reject({error})
+        errorHandler(error, 'createCampaign')
       ))
   ),
 
@@ -78,7 +89,7 @@ module.exports = {
       Promise.resolve(result)
     ))
     .catch((error) => (
-      Promise.reject({error})
+      errorHandler(error , 'createAdSet')
     ))
   ),
 
@@ -88,7 +99,7 @@ module.exports = {
       Promise.resolve(result)
     ))
     .catch((error) => (
-      Promise.reject({error})
+      errorHandler(error, 'createAdSet')
     ))
   ),
 
@@ -115,10 +126,9 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
-    .catch((error) => {
-      console.log('error', error);
-      return Promise.reject(error)
-    })
+    .catch((error) => (
+      errorHandler(error , 'createAdCreative')
+    ))
   ),
 
   bindSetCreative: ({adName, adSetId, adCreativeId}) => {
@@ -132,7 +142,7 @@ module.exports = {
       Promise.resolve(result)
     ))
     .catch((error) => (
-      Promise.reject({error})
+      errorHandler(error , 'bindSetCreative')
     ))
   },
 
@@ -146,10 +156,9 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
-    .catch((error) => {
-      console.log('error', error);
-      return Promise.reject(error)
-    })
+    .catch((error) => (
+      errorHandler(error, 'getReachEstimate')
+    ))
   },
 
   setImage: (img) => (
@@ -158,10 +167,9 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
-    .catch((error) => {
-      console.log('error', error);
-      return Promise.reject(error)
-    })    
+    .catch((error) => (
+      errorHandler(error , 'setImage')
+    ))    
   ),
 
   updateAdSet: ({adSetId, dailyBudget, endTime}) => {
@@ -172,10 +180,9 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
-    .catch((error) => {
-      console.log('error', error);
-      return Promise.reject(error)
-    })
+    .catch((error) => (
+      errorHandler(error, 'updateAdSet')
+    ))
   },
 
   deleteAdSet: (adSetId) => (
@@ -183,9 +190,8 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
-    .catch((error) => {
-      console.log('error', error);
-      return Promise.reject(error)
-    })
+    .catch((error) => (
+      errorHandler(error, 'deleteAdSet')
+    ))
   )  
 };
