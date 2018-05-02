@@ -174,7 +174,7 @@ module.exports = {
 
   updateAdSet: ({adSetId, dailyBudget, endTime}) => {
     return api.call('POST', [adSetId], {
-      [AdSet.Fields.daily_budget]: Math.round(dailyBudget * 0.9),
+      [AdSet.Fields.daily_budget]: Math.round(dailyBudget * 0.88),
       [AdSet.Fields.end_time]: moment().add(endTime * 24 + 1, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
     })
     .then((result) => (
