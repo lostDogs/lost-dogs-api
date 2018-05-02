@@ -64,7 +64,10 @@ dogSchema.methods.createFbAd = function createFbAd({ ad, dogId, userEmail}) {
     fbAds.createAdCreative(Object.assign(ad.creative, {image_hash: imgResp.images.bytes.hash, dogId, adSet: ad.set.adSetId || setResp.id}))
 
     .then(creative => (
-      Promise.resolve({img: {url: imgResp.images.bytes.url, hash: imgResp.images.bytes.hash}, creativeid: creative.id})
+      fbAds.bindSetCreative({adName: dogId, adSetId: ad.set.adSetId || setResp.id, adCreativeId: creative.id})
+      .then(ad => (
+        return Promise.resolve({img: {url: imgResp.images.bytes.url, hash: imgResp.images.bytes.hash}, creativeid: creative.id})
+      ))
     ))
   ))
 };

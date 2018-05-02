@@ -21,6 +21,7 @@ const AdCreativeLinkData = fbAds.AdCreativeLinkData;
 const AdCreativeLinkDataCallToAction = fbAds.AdCreativeLinkDataCallToAction;
 const AdCreativeLinkDataCallToActionValue =   fbAds.AdCreativeLinkDataCallToActionValue;
 const Ad = fbAds.Ad;
+const PromotedObject = fbAds.AdPromotedObject;
 
 //fb adinterests
 const adinterests = require('../config/facebook/adinterest');
@@ -54,13 +55,13 @@ const errorHandler = (error, at) => {
 } 
 
 module.exports = {
-  createCampaign:  ({campaignName, status}) => (
+  createCampaign:  ({campaignName}) => (
     account.createCampaign(
         [Campaign.Fields.id],
         {
           [Campaign.Fields.name]: campaignName,
           [Campaign.Fields.status]: Campaign.Status.paused,
-          [Campaign.Fields.objective]: Campaign.Objective.conversions
+          [Campaign.Fields.objective]: Campaign.Objective.reach
         }
       )
       .then((result) => (
@@ -135,7 +136,7 @@ module.exports = {
     return api.call('POST', [`act_${process.env.ADUSER_ID}`, 'ads'], {
       [Ad.Fields.name]: adName,
       [Ad.Fields.adset_id]: adSetId,
-      [Ad.Fields.creative]: {creative_id: adCreativeId},
+      [Ad.Fields.creative]: {'creative_id': adCreativeId},
       [Ad.Fields.status]: Ad.Status.paused
     })
     .then((result) => (

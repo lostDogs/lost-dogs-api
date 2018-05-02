@@ -9,8 +9,13 @@ module.exports = () => {
     fbAds.bindSetCreative(req.body)
       .then(resp => ( res.status(201).json(resp) ))
       .catch(err => ( res.status(500).json(err) ))
-  );
+    );
 
+    const createCampaign = (req, res) => (
+    fbAds.createCampaign(req.body)
+      .then(resp => ( res.status(201).json(resp) ))
+      .catch(err => ( res.status(500).json(err) ))
+    );
     const getReachEstimate = (req, res) => {
       req.query.latLng = JSON.parse(req.query.latLng);
       if (req.query.adSetId) {
@@ -46,6 +51,7 @@ module.exports = () => {
     bindSetCreative,
     getReachEstimate,
     setImage,
-    deleteAdSet
+    deleteAdSet,
+    createCampaign
   }
 }
