@@ -6,6 +6,8 @@ const Transaction = require('../models/Transaction');
 // libs
 const { handle } = require('../lib/errorHandler');
 const { createFbAdEmail } = require('../outbound/email');
+const moment = require('moment');
+
 module.exports = () => {
   const crudManager = CrudManager(Dog);
 
@@ -16,7 +18,7 @@ module.exports = () => {
       createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 66 + (body.ad.set.dailyBudget / 100 *  body.ad.set.endTime)) ? Promise.reject({
         statusCode: 400,
         code: 'Amount does not match.',
-      }) : Dog.create(Object.assign(createBody, { username: user.username, facebookAds: !!body.ad }))
+      }) : Dog.create(Object.assign(createBody, { username: user.username, facebookAds: {endDate: body.ad && body.ad.set &&moment().add(body.ad.set.endTime * 24 + 1, 'hours').format('YYYY-MM-DD HH:mm:ss Z')} }))
     ))
 
     .then(dog => (
