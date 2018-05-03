@@ -13,7 +13,7 @@ module.exports = () => {
     Dog.createMap(Object.assign(body, {matched: false}))
 
     .then(createBody => (
-      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 65 + (body.ad.set.dailyBudget / 100 *  body.ad.set.endTime)) ? Promise.reject({
+      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 66 + (body.ad.set.dailyBudget / 100 *  body.ad.set.endTime)) ? Promise.reject({
         statusCode: 400,
         code: 'Amount does not match.',
       }) : Dog.create(Object.assign(createBody, { username: user.username, facebookAds: !!body.ad }))
@@ -25,9 +25,10 @@ module.exports = () => {
       .then(paymentInfo => (
         (/admin/g.test(user.role)) || !body.ad || !body.paymentInfo ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(Object.assign(body, {dogId: dog.id, userEmail: user.email}))
 
-        .then(fbAd => (
-          res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
-        ))
+        .then(fbAd => {
+          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), paymentInfo, fbAd});
+          return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
+        })
 
         .catch(error => {
           console.log('error creating fbad >>', error);

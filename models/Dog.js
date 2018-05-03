@@ -60,13 +60,15 @@ dogSchema.methods.createFbAd = function createFbAd({ ad, dogId, userEmail}) {
     (ad.set.adSetId ? fbAds.updateAdSet(ad.set) : fbAds.createAdSet(Object.assign(ad.set, {name: `${userEmail} t: ${(new Date()).toLocaleString()}` }))),
     fbAds.setImage(ad.img)
   ])
+
   .then(([setResp, imgResp]) => (
     fbAds.createAdCreative(Object.assign(ad.creative, {image_hash: imgResp.images.bytes.hash, dogId, adSet: ad.set.adSetId || setResp.id}))
 
     .then(creative => (
       fbAds.bindSetCreative({adName: dogId, adSetId: ad.set.adSetId || setResp.id, adCreativeId: creative.id})
-      .then(ad => (
-        return Promise.resolve({img: {url: imgResp.images.bytes.url, hash: imgResp.images.bytes.hash}, creativeid: creative.id})
+
+      .then(adBind => (
+        Promise.resolve({img: {url: imgResp.images.bytes.url, hash: imgResp.images.bytes.hash}, creativeid: creative.id, adId: adBind.id, adSetId: ad.set.adSetId || setResp.id})
       ))
     ))
   ))
