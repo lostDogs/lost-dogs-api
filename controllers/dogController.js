@@ -31,7 +31,6 @@ module.exports = () => {
         })
 
         .catch(error => {
-          console.log('error creating fbad >>', error);
           body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), error, paymentInfo});
           return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd: {error} }));
         })

@@ -152,7 +152,6 @@ module.exports = {
       optimization_goal: 'REACH',
       targeting_spec: JSON.stringify(createTarget({radius, latLng}))
     }
-    console.log('adSetId', adSetId);
     return api.call('GET', [adSetId, 'delivery_estimate'], params)
     .then((result) => (
       Promise.resolve(result)
