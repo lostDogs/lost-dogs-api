@@ -6,6 +6,8 @@ const Transaction = require('../models/Transaction');
 // libs
 const { handle } = require('../lib/errorHandler');
 const { createFbAdEmail } = require('../outbound/email');
+const moment = require('moment');
+
 module.exports = () => {
   const crudManager = CrudManager(Dog);
 
@@ -13,19 +15,29 @@ module.exports = () => {
     Dog.createMap(Object.assign(body, {matched: false}))
 
     .then(createBody => (
-      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 65) ? Promise.reject({
+      createBody.lost && (!body.paymentInfo || body.paymentInfo.amount !== 66 + (body.ad.set.dailyBudget / 100 *  body.ad.set.endTime)) ? Promise.reject({
         statusCode: 400,
         code: 'Amount does not match.',
-      }) : Dog.create(Object.assign(createBody, { username: user.username }))
+      }) : Dog.create(Object.assign(createBody, { username: user.username, facebookAds: {endDate: body.ad && body.ad.set &&moment().add(body.ad.set.endTime * 24 + 1, 'hours').format('YYYY-MM-DD HH:mm:ss Z')} }))
     ))
 
     .then(dog => (
       (body.paymentInfo &&  !(/admin/g.test(user.role)) ? dog.addPayment({ paymentInfo: body.paymentInfo, user, saveCard: body.saveCard }) : Promise.resolve({}))
 
-      .then(paymentInfo => {
-        body.paymentInfo && createFbAdEmail({dog: dog.getInfo()});
-        return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo }))
-      }, error => (
+      .then(paymentInfo => (
+        (/admin/g.test(user.role)) || !body.ad || !body.paymentInfo ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(Object.assign(body, {dogId: dog.id, userEmail: user.email}))
+
+        .then(fbAd => {
+          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), paymentInfo, fbAd});
+          return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
+        })
+
+        .catch(error => {
+          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), error, paymentInfo});
+          return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd: {error} }));
+        })
+
+      ), error => (
          crudManager.deleteItem(dog.id)
         .then(() => (handle(error, res)))
       ))

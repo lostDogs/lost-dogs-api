@@ -18,7 +18,7 @@
         <td style="width: 60%; background-color: #F2F2F2; border-radius: 10px; text-align: center;">
           <img style="width: 300px;height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
           <h2 style="border-bottom: 10px solid #673A9A; border-radius: 5px; width: 100%;"><i>¡Hola!</i></h2>
-          <h3 style="font-size: 1.5rem;">Error al crear anuncio de facebook: </h3>
+          <h3 style="font-size: 1.5rem;">Mascota creada con <b>exito</b>: </h3>
           <ul style="text-align: left; font-size: 1.3rem;">
             <li><b>nombre: </b>{{dog.name}}</li>
             <li><b>raza: </b> {{dog.kind}} <a style="font-size: 1rem" href="https://github.com/lostDogs/lost-dogs/blob/master/app/common/content/breeds.json"> ver listado de razas</a></li>
@@ -35,12 +35,12 @@
               <li><u>ID: </u> {{paymentInfo.id}}</li>
               <li><u>status: </u> {{paymentInfo.status}}</li>
             </ul></li>
-            <li><b>error:</b><ul>
-              <li><u>at:</u> {{error.at}}</li>
-              <li><u>codigo:</u> {{error.code}}</li>
-              <li><u>mensaje:</u> {{error.data.error_user_msg}}</li>
-              <li><u>presupuesto diario:</u> ${{error.data.data.daily_budget}} centavos</li>
-              <li><u>fin de camapaña:</u> {{error.data.data.end_time}}</li>
+            <li><b>Facebook-ads:</b><ul>
+              <li><u>image url:</u> {{fbAd.img.url}}</li>
+              <li><u>image hash:</u> {{fbAd.img.hash}}</li>
+              <li><u>creative ID:</u> {{fbAd.creativeid}}</li>
+              <li><u>Ad ID:</u> {{fbAd.adId}}</li>
+              <li><u>Adset ID:</u> {{fbAd.adSetId}}</li>
             </ul></li>
           </ul>
           <div style="border-top:10px solid #673A9A; border-radius: 5px;width: 100%;"></div>

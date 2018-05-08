@@ -14,14 +14,15 @@ const app = express();
 mongoose.Promise = Promise;
 
 // middlewares
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({limit: '50mb'}));
 
 // routers
 const dogs = require('./routes/dogRoute');
 const users = require('./routes/userRoute');
 const transactions = require('./routes/transactionRoute');
-const emailNotfications = require('./routes/emailNotifyRoute.js');
+const emailNotfications = require('./routes/emailNotifyRoute');
+const facebookAds = require('./routes/facebook-ads');
 
 /**
  * Connect to MongoDB.
@@ -43,7 +44,8 @@ mongoose.connect(process.env.MONGOLAB_URI || `mongodb://${process.env.MONGODB_PO
   app.use('/api/dogs', dogs);
   app.use('/api/users', users);
   app.use('/api/transactions', transactions);
-  app.use('/api/email',emailNotfications);
+  app.use('/api/email', emailNotfications);
+  app.use('/api/facebook', facebookAds);
 
   /**
    * Start Express server.

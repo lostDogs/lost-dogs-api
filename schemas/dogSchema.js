@@ -32,6 +32,9 @@ const dogSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  facebookAds: {
+    endDate: String,
+  },
 
   upfrontPayment: Boolean,
 
@@ -96,6 +99,7 @@ module.exports.dogMappings = {
       key: 'rewardPayed',
       default: 'false'
     },
+    'facebookAds.endDate': 'facebookAds.endDate',
     address: 'address',
   },
 
@@ -119,6 +123,7 @@ module.exports.dogMappings = {
     reward: 'reward',
     address: 'address',
     rewardPayed: 'rewardPayed',
+    'facebookAds.endDate': 'facebookAds.endDate',
     upfrontPayment: 'upfrontPayment',
   },
 
