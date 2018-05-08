@@ -60,7 +60,7 @@ module.exports = {
         [Campaign.Fields.id],
         {
           [Campaign.Fields.name]: campaignName,
-          [Campaign.Fields.status]: Campaign.Status.paused,
+          [Campaign.Fields.status]: Campaign.Status.active,
           [Campaign.Fields.objective]: Campaign.Objective.reach
         }
       )
@@ -137,7 +137,7 @@ module.exports = {
       [Ad.Fields.name]: adName,
       [Ad.Fields.adset_id]: adSetId,
       [Ad.Fields.creative]: {'creative_id': adCreativeId},
-      [Ad.Fields.status]: Ad.Status.paused
+      [Ad.Fields.status]: /production/g.test(process.env.ENVIRONMENT) ? Ad.Status.active : Ad.Status.paused
     })
     .then((result) => (
       Promise.resolve(result)
@@ -193,5 +193,15 @@ module.exports = {
     .catch((error) => (
       errorHandler(error, 'deleteAdSet')
     ))
-  )  
+  ),
+
+  publishPostAd: (adId) => (
+    api.call('POST', [`${process.env.PAGE_ID}_ ${adId}`], {is_published: true})
+    .then((result) => (
+      Promise.resolve(result)
+    ))
+    .catch((error) => (
+      errorHandler(error, 'publishPostAd')
+    ))
+  )
 };
