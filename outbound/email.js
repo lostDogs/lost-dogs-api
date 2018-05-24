@@ -199,3 +199,35 @@ module.exports.createFbAdEmail = ({ dog, error, paymentInfo, fbAd }) => {
     })
   })
 };
+
+
+module.exports.endAdEmail = ({ results, ownerName, reach, ownerEmail, vets, pounds}) => {
+
+  return templates.load('endAd')
+
+    .then(({ from, subject, bodyCharset, content, appName }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject,
+        body: {
+          data: hugs({ results, ownerName, reach, vets, pounds, metadata: { appName } }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [ownerEmail],
+      },
+    })
+  ))
+
+  .catch(err => {
+    console.error('error sending template', err);
+    return Promise.reject({
+      statusCode: err.statusCode || 500 ,
+      code: err.code,
+    })
+  })
+};

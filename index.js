@@ -23,6 +23,7 @@ const users = require('./routes/userRoute');
 const transactions = require('./routes/transactionRoute');
 const emailNotfications = require('./routes/emailNotifyRoute');
 const facebookAds = require('./routes/facebook-ads');
+const sendEmail = require('./routes/sendEmailRoute');
 
 /**
  * Connect to MongoDB.
@@ -46,6 +47,7 @@ mongoose.connect(process.env.MONGOLAB_URI || `mongodb://${process.env.MONGODB_PO
   app.use('/api/transactions', transactions);
   app.use('/api/email', emailNotfications);
   app.use('/api/facebook', facebookAds);
+  app.use('/api/send', sendEmail);
 
   /**
    * Start Express server.

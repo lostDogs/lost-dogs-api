@@ -1,0 +1,61 @@
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notificacion de Lostdog</title>
+    <link rel="icon" href="http://cdn.lostdog.mx/assets/img/favicon.ico">
+  </head>
+  <body style="margin: 0; background-color: white;">
+    <table style="width: 100%">
+      <tr>
+        <th style="width: 20%;"></th>
+        <th style="width: 60%;"></th>
+        <th style="width: 20%;"></th>
+      </tr>
+      <tr>
+        <td style="width: 20%;"></td>
+        <td style="width: 60%; background-color: #F2F2F2; border-radius: 10px; text-align: center;">
+          <img style="width: 300px; height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
+          <h2 style="border-bottom: 10px solid #673A9A;border-radius: 5px; width: 100%;"><i>¡Hola {{ownerName}}!</i></h2>
+          <h3>La publicación de tu mascota a tenido resultados exitosos:</h3>
+          <div style="text-align: center;">
+            <h4 style="display: inline-block;">Alcanzó a más de </h4> 
+            <h2 style="display: inline-block;"> {{reach}},000 </h2> 
+            </h4><b>Personas</b></h4>
+          </div>
+          <img style="padding-top: 20px;width: 500px;height: auto;" src="{{results}}">
+          <h3 style="padding-top: 20px;">¿Tu mascota aun no aparece?</h3>
+          <p>Por el tiempo que ha pasado desde la fecha en la que se perdió es probable que alguna persona lo tenga resguardado,<br> te recomendamos seguir las siguientes indicaciones:</p>
+          <div style="display: flex">
+            <ul style="margin: auto; text-align: left;">
+              <li>Preguntar en los locales cercanos a donde se perdió con una imagen en mano.</li>
+              <li>Buscarlo por la mañana cuando hay poco ruido y luz del sol.</li>
+              <li>Hablar a las veterinarias y perreras cercanas en la siguiente lista: 
+                <ul>
+                  <li><a href="{{vets}}">Veterinarias</a> </li>
+                  <li><a href="{{pounds}}">Perreras</a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <h3 style="padding-top: 20px;">¿Lo encontraste?</h3>
+          <p>Muchas felicidades, nos da mucha alegría saber que lo has encontrado.</p>
+          <p>No lo vuelvas a perder, te recomendamos conseguir un rastreador GPS,<br> existen diversas marcas y precios, aquí algunas opciones disponibles <b>*</b> :</p>
+          <div style="display: flex">
+            <ul style="margin: auto; text-align: left;">
+              <li><a href="https://www.amazon.com.mx/Baoblaze-RF-V30-Mascotas-Impermeable-Localizador/dp/B073TVSM5Q/ref=sr_1_16?ie=UTF8&qid=1527026815&sr=8-16">Baoblaze GPS Impermeable</a></li>
+              <li><a href="https://www.amazon.com.mx/LINK-AKC-Smart-Dog-Collar/dp/B01M9JMXM2/ref=sr_1_7?ie=UTF8&qid=1527026815&sr=8-7&th=1">collar Smart Dog</a></li>
+              <li><a href="https://articulo.mercadolibre.com.mx/MLM-617954969-coche-vehiculo-gps-gsm-gprs-rastreador-localizador-sos-enci-_JM">localizador GPS</a></li>
+            </ul>
+          </div>
+            <p style="padding-top: 20px;font-size: 70%"><b>*</b>LostDog no tiene nada que ver con la venta de los productos y la información es únicamente compartida.</p>
+            <p style="padding-top: 30px">Si aun tienes dudas o comentarios no dudes en escribirnos a <b>soporte@lostdog.mx</b></p>
+            <h5 style="padding-top: 30px;">Atentamente Equipo Lost Dog</h5>
+          <div style="border-top: 10px solid #673A9A;border-radius: 5px;width: 100%;"></div>
+          <div style="margin-top: 5px; padding-bottom: 10px;"> <a href="mailto:soporte@Lostdog.mx">soporte@Lostdog.mx </a><b> | </b> <a href="https://{{metadata.appName}}/#/info/faqs"> Preguntas frecuentes</a></div>
+        </th>
+        <td style="width: 20%;"></td>        
+      </tr>
+    </table>
+  </body>
+</html>
