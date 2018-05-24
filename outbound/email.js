@@ -231,3 +231,36 @@ module.exports.endAdEmail = ({ results, ownerName, reach, ownerEmail, vets, poun
     })
   })
 };
+
+module.exports.startAdEmail = ({ ownerName, ownerEmail, postId, dogName, dogBreed}) => {
+
+  return templates.load('startAd')
+
+    .then(({ from, subject, bodyCharset, content, appName }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject: {
+          data: 'Ya estamos buscando a ' + (dogName || 'tu '+ dogBreed),
+        },
+        body: {
+          data: hugs({  ownerName, postId ,dog: dogName || 'tu '+ dogBreed, metadata: { appName } }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [ownerEmail],
+      },
+    })
+  ))
+
+  .catch(err => {
+    console.error('error sending template', err);
+    return Promise.reject({
+      statusCode: err.statusCode || 500 ,
+      code: err.code,
+    })
+  })
+};
