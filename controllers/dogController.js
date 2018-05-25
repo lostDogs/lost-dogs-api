@@ -28,12 +28,12 @@ module.exports = () => {
         (/admin/g.test(user.role)) || !body.ad || !body.paymentInfo ? res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo})) : dog.createFbAd(Object.assign(body, {dogId: dog.id, userEmail: user.email}))
 
         .then(fbAd => {
-          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), paymentInfo, fbAd});
+          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), paymentInfo, fbAd, user});
           return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd }))
         })
 
         .catch(error => {
-          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), error, paymentInfo});
+          body.paymentInfo && createFbAdEmail({dog: dog.getInfo(), error, paymentInfo, user });
           return res.status(201).json(Object.assign(dog.getInfo(), { paymentInfo, fbAd: {error} }));
         })
 

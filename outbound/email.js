@@ -165,7 +165,7 @@ module.exports.forgotPasswordEmail = ({ user, password }) => (
   ))
 );
 
-module.exports.createFbAdEmail = ({ dog, error, paymentInfo, fbAd }) => {
+module.exports.createFbAdEmail = ({ dog, error, paymentInfo, fbAd, user }) => {
   const mapsUrl = `https://www.google.com/maps/?q=${dog.location.coordinates[1]},${dog.location.coordinates[0]}`;
   const imgUrl = dog.images[0].image_url + '';
   const gender = dog.male + '';
@@ -181,12 +181,77 @@ module.exports.createFbAdEmail = ({ dog, error, paymentInfo, fbAd }) => {
       content: {
         subject,
         body: {
-          data: hugs({ dog, mapsUrl, imgUrl, gender, error, paymentInfo, fbAd, metadata: { appName } }, content),
+          data: hugs({ dog, mapsUrl, imgUrl, gender, error, paymentInfo, fbAd, user, metadata: { appName } }, content),
           charset: bodyCharset,
         },
       },
       recipientInfo: {
         to: [process.env.EMAIL_MONITOR],
+      },
+    })
+  ))
+
+  .catch(err => {
+    console.error('error sending template', err);
+    return Promise.reject({
+      statusCode: err.statusCode || 500 ,
+      code: err.code,
+    })
+  })
+};
+
+
+module.exports.endAdEmail = ({ results, ownerName, reach, ownerEmail, vets, pounds}) => {
+
+  return templates.load('endAd')
+
+    .then(({ from, subject, bodyCharset, content, appName }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject,
+        body: {
+          data: hugs({ results, ownerName, reach, vets, pounds, metadata: { appName } }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [ownerEmail],
+      },
+    })
+  ))
+
+  .catch(err => {
+    console.error('error sending template', err);
+    return Promise.reject({
+      statusCode: err.statusCode || 500 ,
+      code: err.code,
+    })
+  })
+};
+
+module.exports.startAdEmail = ({ ownerName, ownerEmail, postId, dogName, dogBreed}) => {
+
+  return templates.load('startAd')
+
+    .then(({ from, subject, bodyCharset, content, appName }) => (
+    ses.sendEmail({
+      fromInfo: {
+        from,
+      },
+      content: {
+        subject: {
+          data: 'Ya estamos buscando a ' + (dogName || 'tu '+ dogBreed),
+        },
+        body: {
+          data: hugs({  ownerName, postId ,dog: dogName || 'tu '+ dogBreed, metadata: { appName } }, content),
+          charset: bodyCharset,
+        },
+      },
+      recipientInfo: {
+        to: [ownerEmail],
       },
     })
   ))
