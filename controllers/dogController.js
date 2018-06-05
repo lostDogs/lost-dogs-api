@@ -9,7 +9,7 @@ const Transaction = require('../models/Transaction');
 
 // libs
 const { handle } = require('../lib/errorHandler');
-const { createFbAdEmail, seenBy } = require('../outbound/email');
+const { createFbAdEmail, subscribersEmail } = require('../outbound/email');
 const moment = require('moment');
 
 module.exports = () => {
@@ -120,7 +120,7 @@ module.exports = () => {
         })
 
         .then((subscriptors) => (
-          seenBy({subscriptors, dog: dog.getInfo(), reporter: req.user.name, ownerId: dog.reporter_id , seenBy: req.body.seenBy})
+          subscribersEmail({subscriptors, dog: dog.getInfo(), reporter: req.user.name, ownerId: dog.reporter_id , seenBy: req.body.seenBy, emailType: 'seenBy'})
 
           .then(()=> (
             res.json(dog.getInfo())

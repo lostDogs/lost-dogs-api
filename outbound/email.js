@@ -266,14 +266,18 @@ module.exports.startAdEmail = ({ ownerName, ownerEmail, postId, dogName, dogBree
   })
 };
 
-module.exports.seenBy = ({subscriptors, dog, reporter, seenBy, ownerId}) => {
-  const lat = seenBy.coordinates[1] + '';
-  const long = seenBy.coordinates[0] + '';
+module.exports.subscribersEmail = ({subscriptors, dog, reporter, seenBy, ownerId, emailType}) => {
   const imgUrl = dog.images[0].image_url + '';
   moment.locale('es');
-  seenBy.date = moment(seenBy.date).format('LL');
+  const lat = '';
+  const long = '';
+  if (seenBy) {
+    seenBy.date = moment(seenBy.date).format('LL');
+    lat = seenBy.coordinates[1] + '';
+    long = seenBy.coordinates[0] + '';
+  }
 
-  return templates.load('seenBy')
+  return templates.load(emailType)
 
     .then(({ from, subject, bodyCharset, content, appName }) => (
       Promise.all(subscriptors.map((subscriptor) => (
@@ -284,7 +288,7 @@ module.exports.seenBy = ({subscriptors, dog, reporter, seenBy, ownerId}) => {
           content: {
             subject,
             body: {
-              data: hugs({userName: subscriptor.name, imgUrl, reporter, seenBy, lat, long, dogName: dog.name !== 'NA/' ? dog.name :  new RegExp(ownerId, 'g').test(subscriptor._id + '') ? ' tu mascota' : 'la mascota'   ,metadata: { appName, mapsKey: process.env.MAPS_KEY } }, content),
+              data: hugs({userName: subscriptor.name, imgUrl, reporter, seenBy, lat, long, dog, dogName: dog.name !== 'NA/' ? dog.name :  new RegExp(ownerId, 'g').test(subscriptor._id + '') ? ' tu mascota' : 'la mascota'   ,metadata: { appName, mapsKey: process.env.MAPS_KEY } }, content),
               charset: bodyCharset,
             },
           },

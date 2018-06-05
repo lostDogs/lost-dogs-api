@@ -1,0 +1,31 @@
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>han encontrado a {{dogName}}</title>
+    <link rel="icon" href="http://cdn.lostdog.mx/assets/img/favicon.ico">
+  </head>
+  <body style="margin: 0; background-color: white;">
+    <table style="width: 100%">
+      <tr>
+        <th style="width: 20%;"></th>
+        <th style="width: 60%;"></th>
+        <th style="width: 20%;"></th>
+      </tr>
+      <tr>
+        <td style="width: 20%;"></td>
+        <td style="width: 60%; background-color: #F2F2F2; border-radius: 10px; text-align: center;">
+          <img style="width: 300px; height: 127px;margin-top: 25px;" src="http://cdn.lostdog.mx/assets/img/logo-name.png">
+          <h2 style="border-bottom: 10px solid #673A9A;border-radius: 5px; width: 100%;"><i>¡Hola {{userName}}!</i></h2>
+          <h3>{{reporter}} encontró a <a href="https://{{metadata.appName}}/#/dog/?id={{dog._id}}">{{dogName}}</a></h3>
+          <img src="{{imgUrl}}" width="150px" height="150px" style="border-radius: 50%; border: 4px solid #673A9A; padding: 10px; background-color: white" />
+          <p style="margin-top:20px">Gracias por subscribirte. Tu subscripción a esta mascota ha termiando.</p>
+          <h5 style="padding-top: 40px;">Atentamente Equipo Lost Dog</h5>
+          <div style="border-top: 10px solid #673A9A;border-radius: 5px;width: 100%;"></div>
+          <div style="margin-top: 5px; padding-bottom: 10px;"> <a href="mailto:soporte@Lostdog.mx">soporte@Lostdog.mx </a><b> | </b> <a href="https://{{metadata.appName}}/#/info/faqs"> Preguntas frecuentes</a></div>
+        </th>
+        <td style="width: 20%;"></td>
+      </tr>
+    </table>
+  </body>
+</html>

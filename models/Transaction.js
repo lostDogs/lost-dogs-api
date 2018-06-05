@@ -14,6 +14,7 @@ const s3 = require('../aws').s3(process.env.s3_DISPOSABLE_BUCKET);
 const { validateRequiredFields, encryptString } = require('../lib/common');
 const { foundEmail, lostEmail, rescuerInfo } = require('../outbound/email');
 const { generateAndUpload } = require('../lib/qrCode');
+const { subscribersEmail } = require('../outbound/email');
 
 // schema
 const transactionSchema = require('../schemas/transactionSchema');
@@ -101,10 +102,35 @@ transactionSchema.methods.reward = function reward({ user, body }) {
       Object.assign(dog, {matched: true}).save()
       
       .then(()=> (
-         this.update({ status: 'success'})
-         .then(() => (
-           Promise.resolve(paymentResult)
-         ))
+        this.update({ status: 'success'})
+
+        .then(() => {
+          return !dog.subscribers.length ? Promise.resolve(paymentResult) : User.find({
+            '_id': {
+              $in: dog.subscribers.map((subcriptor) => (
+                mongoose.Types.ObjectId(subcriptor)
+              ))
+            }
+          }, 'name email')
+
+          .then((subscriptors) => (
+            subscribersEmail({subscriptors, dog: dog.getInfo(), reporter: user.name, ownerId: dog.reporter_id, emailType: 'foundSubscribers'})
+
+            .then(()=> (
+              Promise.resolve(paymentResult)
+            ))
+          ))
+
+          .catch((e) => {
+            console.error('error sending found subscribers', e);
+            return Promise.resolve(paymentResult)
+          })          
+        })
+
+        .catch((e) => {
+          console.error('error sending found subscribers', e);
+          return Promise.resolve(paymentResult)
+        })
       ))
     ))
   ));
