@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 // dogs controller
-const { search, retrieve, create, update, deleteItem, found, lost } = require('../controllers/dogController')();
+const { search, retrieve, create, update, updateSeen, updateSubscribers, deleteItem, found, lost } = require('../controllers/dogController')();
 const annonAuthMiddleware = require('../lib/token').middleware({ reqUser: false });
 const userAuthMiddleware = require('../lib/token').middleware({ reqUser: true });
 
@@ -21,6 +21,8 @@ router.delete('/:id', userAuthMiddleware, deleteItem);
 // reporting routes
 router.post('/:id/found', userAuthMiddleware, found);
 router.post('/:id/lost', userAuthMiddleware, lost);
+router.put('/:id/seen', userAuthMiddleware, updateSeen);
+router.put('/:id/subscribe', userAuthMiddleware, updateSubscribers);
 
 // Extras
 // router.put('/:id/image', userAuthMiddleware, controller.updateImage);

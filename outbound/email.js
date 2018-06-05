@@ -2,6 +2,7 @@
 const hugs = require('../lib/common').hugs;
 const templates = require('../config/templates');
 const ses = require('../aws').ses;
+const moment = require('moment');
 
 module.exports.verifyAccount = user => (
   templates.load('verifyAccount')
@@ -255,6 +256,44 @@ module.exports.startAdEmail = ({ ownerName, ownerEmail, postId, dogName, dogBree
       },
     })
   ))
+
+  .catch(err => {
+    console.error('error sending template', err);
+    return Promise.reject({
+      statusCode: err.statusCode || 500 ,
+      code: err.code,
+    })
+  })
+};
+
+module.exports.seenBy = ({subscriptors, dog, reporter, seenBy, ownerId}) => {
+  const lat = seenBy.coordinates[1] + '';
+  const long = seenBy.coordinates[0] + '';
+  const imgUrl = dog.images[0].image_url + '';
+  moment.locale('es');
+  seenBy.date = moment(seenBy.date).format('LL');
+
+  return templates.load('seenBy')
+
+    .then(({ from, subject, bodyCharset, content, appName }) => (
+      Promise.all(subscriptors.map((subscriptor) => (
+        ses.sendEmail({
+          fromInfo: {
+            from,
+          },
+          content: {
+            subject,
+            body: {
+              data: hugs({userName: subscriptor.name, imgUrl, reporter, seenBy, lat, long, dogName: dog.name !== 'NA/' ? dog.name :  new RegExp(ownerId, 'g').test(subscriptor._id + '') ? ' tu mascota' : 'la mascota'   ,metadata: { appName, mapsKey: process.env.MAPS_KEY } }, content),
+              charset: bodyCharset,
+            },
+          },
+          recipientInfo: {
+            to: [subscriptor.email]
+          },
+        })
+      )))
+    ))
 
   .catch(err => {
     console.error('error sending template', err);

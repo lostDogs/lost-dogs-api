@@ -37,7 +37,7 @@ const createTarget = ({radius, latLng}) => ({
       }],
       [TargetingGeoLocation.Fields.location_types]: ['recent', 'home']
     },
-    [Targeting.Fields.age_min]: '13',
+    [Targeting.Fields.age_min]: '17',
     [Targeting.Fields.age_max]: '60',
     [Targeting.Fields.publisher_platforms]: ['facebook'],
     [Targeting.Fields.facebook_positions]:  ['feed', 'right_hand_column']
