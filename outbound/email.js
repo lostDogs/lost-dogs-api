@@ -269,8 +269,8 @@ module.exports.startAdEmail = ({ ownerName, ownerEmail, postId, dogName, dogBree
 module.exports.subscribersEmail = ({subscriptors, dog, reporter, seenBy, ownerId, emailType}) => {
   const imgUrl = dog.images[0].image_url + '';
   moment.locale('es');
-  const lat = '';
-  const long = '';
+  let lat = '';
+  let long = '';
   if (seenBy) {
     seenBy.date = moment(seenBy.date).format('LL');
     lat = seenBy.coordinates[1] + '';
