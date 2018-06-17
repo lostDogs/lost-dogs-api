@@ -1,11 +1,15 @@
+//dependencies
+const mongoose = require('mongoose');
+
 // models
 const CrudManager = require('./crudManager');
 const Dog = require('../models/Dog');
+const User = require('../models/User');
 const Transaction = require('../models/Transaction');
 
 // libs
 const { handle } = require('../lib/errorHandler');
-const { createFbAdEmail } = require('../outbound/email');
+const { createFbAdEmail, subscribersEmail } = require('../outbound/email');
 const moment = require('moment');
 
 module.exports = () => {
@@ -83,6 +87,71 @@ module.exports = () => {
     .catch(err => (
       handle(err, res)
     ))
+  );
+
+   const updateSeen = (req, res) => (
+    Dog.updateMap(req.body)
+
+    .then(updateBody => {
+      return !req.body.seenBy ? Promise.reject({
+        statusCode: 401,
+        code: 'Not authorized.',
+      }) : Dog.findOne({ _id: req.params.id})
+
+      .then(dog => (!dog ? Promise.reject({
+        statusCode: 404,
+        code: 'Not found.',
+      }) : Promise.resolve(dog)))
+
+      .then(dog => {
+        req.body.seenBy && dog.seenBy.push(updateBody.seenBy);
+
+        return dog.save()
+
+        .then(() => {
+          !~dog.subscribers.indexOf(dog.reporter_id) && dog.subscribers.push(dog.reporter_id);
+          return dog.subscribers.length && User.find({
+            '_id': {
+              $in: dog.subscribers.map((subcriptor) => (
+                mongoose.Types.ObjectId(subcriptor)
+              ))
+            }
+          }, 'name email')
+        })
+
+        .then((subscriptors) => (
+          subscribersEmail({subscriptors, dog: dog.getInfo(), reporter: req.user.name, ownerId: dog.reporter_id , seenBy: req.body.seenBy, emailType: 'seenBy'})
+
+          .then(()=> (
+            res.json(dog.getInfo())
+          ))
+        ))
+      })
+    })
+
+    .catch(err => (
+      handle(err, res)
+    ))
+  ); 
+
+  const updateSubscribers = (req, res) => (
+    Dog.updateMap(req.body)
+
+        .then(updateBody => {
+          return !(req.body.subscriber || req.body.unsubscriber) ? Promise.reject({
+            statusCode: 401,
+            code: 'Not authorized.',
+          }) : Dog.findOne({ _id: req.params.id})
+
+          .then(dog => {
+            req.body.subscriber && !~dog.subscribers.indexOf(req.body.subscriber) && dog.subscribers.push(req.body.subscriber);
+            req.body.unsubscriber && ~dog.subscribers.indexOf(req.body.unsubscriber) && dog.subscribers.splice(dog.subscribers.indexOf(req.body.unsubscriber), 1);
+            return dog.save()
+            .then(() => (
+              res.json(dog.getInfo())
+            ))
+          })
+        })    
   );
 
   const retrieve = (req, res) => (
@@ -173,6 +242,8 @@ module.exports = () => {
     create,
     retrieve,
     update,
+    updateSeen,
+    updateSubscribers,
     deleteItem,
     search,
     found,

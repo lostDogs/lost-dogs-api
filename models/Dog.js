@@ -190,9 +190,7 @@ dogSchema.statics.createMap = body => (
 
 dogSchema.statics.updateMap = (body) => {
   const updateBody = objectMapper(body, dogMappings.createMap);
-  return Promise.resolve(Object.assign(body, {
-    found_date: updateBody.found_date ? moment(updateBody.found_date, 'YYYY-MM-DD HH:mm').toDate() : null,
-  }));
+  return Promise.resolve(body);
 };
 
 dogSchema.pre('save', function preSave(next) {

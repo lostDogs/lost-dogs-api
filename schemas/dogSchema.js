@@ -35,7 +35,13 @@ const dogSchema = new mongoose.Schema({
   facebookAds: {
     endDate: String,
   },
-
+  seenBy: [{
+    userId: String,
+    coordinates:  [Number],
+    address: String,
+    date: String
+  }],
+  subscribers: [String],
   upfrontPayment: Boolean,
 
   search: Array,
@@ -100,6 +106,8 @@ module.exports.dogMappings = {
       default: 'false'
     },
     'facebookAds.endDate': 'facebookAds.endDate',
+    'seenBy': 'seenBy' ,
+    'subscribers': 'subscribers',
     address: 'address',
   },
 
@@ -124,6 +132,8 @@ module.exports.dogMappings = {
     address: 'address',
     rewardPayed: 'rewardPayed',
     'facebookAds.endDate': 'facebookAds.endDate',
+    'seenBy': 'seenBy' ,
+    'subscribers': 'subscribers',
     upfrontPayment: 'upfrontPayment',
   },
 
