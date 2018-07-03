@@ -209,7 +209,10 @@ module.exports = {
   ),
   
   getAdsetInsight: (adSetId) => (
-    api.call('GET', [`${adSetId}/insights`], {fields: 'reach,impressions,clicks'})
+    api.call('GET', [`${adSetId}/insights`], {
+      fields: 'reach,impressions,clicks',
+      date_preset: 'lifetime'
+    })
     
     .then((data) => {
       console.log('data >>',  data)
