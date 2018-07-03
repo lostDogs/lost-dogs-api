@@ -177,6 +177,7 @@ module.exports = {
       [AdSet.Fields.daily_budget]: Math.round(dailyBudget * 0.88),
       [AdSet.Fields.end_time]: moment().add(endTime * 24 + 1, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
     })
+    
     .then((result) => (
       Promise.resolve(result)
     ))
@@ -187,6 +188,7 @@ module.exports = {
 
   deleteAdSet: (adSetId) => (
     api.call('DELETE', [adSetId], {})
+    
     .then((result) => (
       Promise.resolve(result)
     ))
@@ -197,11 +199,24 @@ module.exports = {
 
   publishPostAd: (adId) => (
     api.call('POST', [`${process.env.PAGE_ID}_ ${adId}`], {is_published: true})
+    
     .then((result) => (
       Promise.resolve(result)
     ))
     .catch((error) => (
       errorHandler(error, 'publishPostAd')
     ))
-  )
+  ),
+  
+  getAdsetInsight: (adSetId) => (
+    api.call('GET', [`${adSetId}/insights`], {fields: 'reach,impressions,clicks'})
+    
+    .then((data) => {
+      console.log('data >>',  data)
+    })
+
+    .catch((error) => (
+      errorHandler(error, 'getAdsetInsight')
+    ))    
+    )
 };
