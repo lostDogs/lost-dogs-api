@@ -1,5 +1,5 @@
 // dependencies
-const fbAds = require('facebook-nodejs-ads-sdk');
+const fbAds = require('facebook-nodejs-business-sdk');
 const moment = require('moment');
 const fetch = require('node-fetch');
 var http = require("https");
@@ -22,6 +22,7 @@ const AdCreativeLinkDataCallToAction = fbAds.AdCreativeLinkDataCallToAction;
 const AdCreativeLinkDataCallToActionValue =   fbAds.AdCreativeLinkDataCallToActionValue;
 const Ad = fbAds.Ad;
 const PromotedObject = fbAds.AdPromotedObject;
+const FrequencySpecs = fbAds.AdCampaignFrequencyControlSpecs;
 
 //fb adinterests
 const adinterests = require('../config/facebook/adinterest');
@@ -78,12 +79,17 @@ module.exports = {
         [AdSet.Fields.name]: name,
         [AdSet.Fields.optimization_goal]: AdSet.OptimizationGoal.reach,
         [AdSet.Fields.daily_budget]: dailyBudget * 0.9,
-        [AdSet.Fields.is_autobid]: true,
+        [AdSet.Fields.bid_strategy]: AdSet.BidStrategy.lowest_cost_without_cap,
         [AdSet.Fields.campaign_id]: process.env.CAMPAIGN_ID,
         [AdSet.Fields.targeting]: createTarget({radius, latLng}),
         [AdSet.Fields.start_time]: moment().add(1, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
         [AdSet.Fields.end_time]: moment().add(25, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
-        [AdSet.Fields.billing_event]: AdSet.BillingEvent.impressions
+        [AdSet.Fields.billing_event]: AdSet.BillingEvent.impressions,
+        [AdSet.Fields.frequency_control_specs]: [{
+          [FrequencySpecs.Fields.event]: 'IMPRESSIONS',
+          [FrequencySpecs.Fields.interval_days]: 90,
+          [FrequencySpecs.Fields.max_frequency]: 1,
+        }]
       }
     )
     .then((result) => (
@@ -100,7 +106,7 @@ module.exports = {
       Promise.resolve(result)
     ))
     .catch((error) => (
-      errorHandler(error, 'createAdSet')
+      errorHandler(error, 'getAllCampaign')
     ))
   ),
 
@@ -150,12 +156,14 @@ module.exports = {
   getReachEstimate: ({adSetId, radius, latLng}) => {
     const params = {
       optimization_goal: 'REACH',
-      targeting_spec: JSON.stringify(createTarget({radius, latLng}))
-    }
+      targeting_spec: JSON.stringify(createTarget({radius, latLng})),
+    };
+
     return api.call('GET', [adSetId, 'delivery_estimate'], params)
     .then((result) => (
       Promise.resolve(result)
     ))
+
     .catch((error) => (
       errorHandler(error, 'getReachEstimate')
     ))
@@ -167,6 +175,7 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
+
     .catch((error) => (
       errorHandler(error , 'setImage')
     ))    
