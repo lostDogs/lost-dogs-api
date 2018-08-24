@@ -16,7 +16,6 @@ module.exports = () => {
       .then(resp => ( res.status(201).json(resp) ))
       .catch(err => ( res.status(500).json(err) ))
     );
-
     const getReachEstimate = (req, res) => {
       req.query.latLng = JSON.parse(req.query.latLng);
       if (req.query.adSetId) {
@@ -24,7 +23,6 @@ module.exports = () => {
         .then(resp => ( res.status(201).json(Object.assign(resp, {adSetId: req.query.adSetId})) ))
         .catch(err => ( res.status(500).json(err) ))
       }
-  
       return fbAds.createAdSet(req.query)
 
       .then(adSet => (

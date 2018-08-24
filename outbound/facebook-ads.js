@@ -1,5 +1,5 @@
 // dependencies
-const fbAds = require('facebook-nodejs-business-sdk');
+const fbAds = require('facebook-nodejs-ads-sdk');
 const moment = require('moment');
 const fetch = require('node-fetch');
 var http = require("https");
@@ -78,7 +78,7 @@ module.exports = {
         [AdSet.Fields.name]: name,
         [AdSet.Fields.optimization_goal]: AdSet.OptimizationGoal.reach,
         [AdSet.Fields.daily_budget]: dailyBudget * 0.9,
-        [AdSet.Fields.bid_strategy]: AdSet.BidStrategy.lowest_cost_without_cap,
+        [AdSet.Fields.is_autobid]: true,
         [AdSet.Fields.campaign_id]: process.env.CAMPAIGN_ID,
         [AdSet.Fields.targeting]: createTarget({radius, latLng}),
         [AdSet.Fields.start_time]: moment().add(1, 'hours').format('YYYY-MM-DD HH:mm:ss Z'),
@@ -100,7 +100,7 @@ module.exports = {
       Promise.resolve(result)
     ))
     .catch((error) => (
-      errorHandler(error, 'getAllCampaign')
+      errorHandler(error, 'createAdSet')
     ))
   ),
 
@@ -150,14 +150,12 @@ module.exports = {
   getReachEstimate: ({adSetId, radius, latLng}) => {
     const params = {
       optimization_goal: 'REACH',
-      targeting_spec: JSON.stringify(createTarget({radius, latLng})),
-    };
-
+      targeting_spec: JSON.stringify(createTarget({radius, latLng}))
+    }
     return api.call('GET', [adSetId, 'delivery_estimate'], params)
     .then((result) => (
       Promise.resolve(result)
     ))
-
     .catch((error) => (
       errorHandler(error, 'getReachEstimate')
     ))
@@ -169,7 +167,6 @@ module.exports = {
     .then((result) => (
       Promise.resolve(result)
     ))
-
     .catch((error) => (
       errorHandler(error , 'setImage')
     ))    
