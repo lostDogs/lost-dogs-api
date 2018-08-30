@@ -104,12 +104,17 @@ module.exports = () => {
       }) : Promise.resolve(dog)))
 
       .then(dog => {
-        req.body.seenBy && dog.seenBy.push(updateBody.seenBy);
-
+        // Changed concat([]) because $pushAll (Array.push was deprecated).
+        if (req.body.seenBy) {
+          dog.seenBy = dog.seenBy.concat([updateBody.seenBy]); 
+        }
         return dog.save()
 
         .then(() => {
-          !~dog.subscribers.indexOf(dog.reporter_id) && dog.subscribers.push(dog.reporter_id);
+          // Changed concat([]) because $pushAll (Array.push was deprecated).
+          if (!~dog.subscribers.indexOf(dog.reporter_id)) {
+             dog.subscribers = dog.subscribers.concat([dog.reporter_id]);
+          }
           return dog.subscribers.length && User.find({
             '_id': {
               $in: dog.subscribers.map((subcriptor) => (
@@ -144,7 +149,10 @@ module.exports = () => {
           }) : Dog.findOne({ _id: req.params.id})
 
           .then(dog => {
-            req.body.subscriber && !~dog.subscribers.indexOf(req.body.subscriber) && dog.subscribers.push(req.body.subscriber);
+            // Changed concat([]) because $pushAll (Array.push was deprecated).
+            if (req.body.subscriber && !~dog.subscribers.indexOf(req.body.subscriber)) {
+              dog.subscribers = dog.subscribers.concat([req.body.subscriber]);
+            }
             req.body.unsubscriber && ~dog.subscribers.indexOf(req.body.unsubscriber) && dog.subscribers.splice(dog.subscribers.indexOf(req.body.unsubscriber), 1);
             return dog.save()
             .then(() => (
